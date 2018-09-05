@@ -1,0 +1,102 @@
+<button type="button" class="btn btn-sm btn-outline-info btn-icon" data-toggle="collapse" data-target="#sample">
+  <span class="btn-inner--icon"><i class="fas fa-question"></i></span>
+  <span class="btn-inner--text">入力説明</span>
+</button>
+<div id="sample" class="collapse">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="card">
+        <div class="card-body">
+          <p class="card-text">
+            <h6 class="heading heading-6 strong-600">未購入一覧が表示される場合</h6>
+            表示されるアイテムが購入されたものならば〇ボタン、購入できなかったら×ボタンを押してください。<br/>
+            なお、締めボタンを押すと、全ての未購入アイテムが購入不可のものとして処理されます。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">〇ボタンを押下した場合</h6>
+            この画面から〇ボタンを押した場合、そのアイテムを購入した人はボタンを押したユーザーとして自動的に変更されます。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">「締め」ボタン押下後の流れ</h6>
+            イベントが締められると、一部購入（3冊買う予定が1冊しか買えなかったようなパターン）となったアイテムが表示されます。<br />
+            誰が購入するのかを決め、全てのアイテムの購入調整が終わると、精算画面が表示されます。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">「締め」ボタンが押下できない</h6>
+            イベント当日、あるいは未来のイベントの場合、「締め」ボタンは、イベント作成者しか押せません。<br />
+            イベント作成者に依頼し、イベントを締めてもらってください。<br />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%= render 'plan/group_overview' %>
+<br /><br />
+<% if @non_purchase.size == 0 %>
+  未購入品はありません。
+<% else %>
+  選択されたイベント計画は締められていません。未購入の状況を確認、修正して締めてください。<br />
+  ※締めボタンを押すと、全て購入不可として処理されます。<br />
+    <table class="table table-hover align-items-center table-sm">
+    <thead>
+      <tr>
+          <th scope="col" class="d-none d-sm-table-cell">#</th>
+          <th scope="col">本の名前</th>
+          <th scope="col">スペース番号</th>
+          <th scope="col" class="d-none d-sm-table-cell">サークル名</th>
+          <th scope="col" class="d-none d-sm-table-cell">値段</th>
+          <th>購入数</th>
+          <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @non_purchase.each do |p| %>
+        <tr>
+          <td class="d-none d-sm-table-cell"><%= p.priority.to_s %></td>
+          <td><% if p.item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %><%= link_to p.item.item_name, plan_display_path + '/' + p.id.to_s, remote: true %></td>
+          <td><%= p.block_number %>-<%= p.space_number %></td>
+          <td class="d-none d-sm-table-cell"><%= p.item.circle_name %></td>
+          <td class="d-none d-sm-table-cell"><% if p.item.price.nil?%>未設定<% else %><%= p.item.price.to_s %>円<% end %></td>
+          <td>
+            <% want_count_sum = 0 %>
+            <% p.purchase_members.each {|pm| want_count_sum += pm.want_count } %>
+            <%= want_count_sum.to_s %>
+          </td>
+          <td>
+            <div class="btn-group-vertical btn-group-xs">
+              <%= form_tag( {controller: :shopping, action: :save_bad}, id: :fs, class: "form-inline", remote: true)do %>
+                <% if @cr.nil? %>
+                  <%= link_to '〇', shopping_status_path + '/' + p.id.to_s + '/' + want_count_sum.to_s, remote: true, class:"btn btn-primary btn-sm" %>
+                  <%= hidden_field_tag 'g_id', params[:id] %>
+                  <%= hidden_field_tag 'rtn', 'shopping_end' %>
+                <% else %>
+                  <%= link_to '〇', shopping_status_path + '/' + p.id.to_s + '/' + want_count_sum.to_s + '/hs/' + p.group_id.to_s, remote: true, class:"btn btn-primary btn-sm" %>
+                  <%= hidden_field_tag 'g_id', @g_id %>
+                  <%= hidden_field_tag 'rtn', 'history_end' %>
+                <% end %>
+                <%= hidden_field_tag 'p_id', p.id %>
+                <%= submit_tag "×", data: { confirm: '購入不可としますか？' }, class: "btn btn-danger", id: "btn btn-danger btn-s", name:"bad" %>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+<% if @cr.nil? && @group.create_user_id != current_user.id  %>
+  イベント当日の締めは、イベント計画作成者のみ行うことができます。
+<% elsif !@cr.nil? && @group.purchase_day > Date.today && @group.create_user_id != current_user.id %>
+  未来のイベントの締めは、イベント計画作成者のみ行うことができます。
+<% else %>
+  <%= form_tag( {controller: :shopping, action: :group_end}, id: :fse, remote: true)do %>
+    <% if @cr.nil? %>
+      <%= hidden_field_tag 'group_id', params[:id] %>
+      <%= hidden_field_tag 'rtn', 'shopping_end' %>
+    <% else %>
+      <%= hidden_field_tag 'group_id', @group.id %>
+      <%= hidden_field_tag 'rtn', 'history_end' %>
+    <% end %>
+    <%= submit_tag "締め", class: "btn btn-danger", id: "end_btn" , data: { confirm: "買い物を全て終了します。よろしいですか？"} %>
+  <% end %>
+<% end %>
+<div id="shopping-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1500"></div>
+<div id="plan-display-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>

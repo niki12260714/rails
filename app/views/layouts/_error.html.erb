@@ -1,0 +1,11 @@
+<div class="alert alert-danger">
+  <a class="close" data-dismiss="alert">×</a>
+  <% if !@errors.nil? %>
+    <% @errors.full_messages.each do |msg| %>
+      <%= msg %><br />
+    <% end %>
+  <% end %>
+  <% if !@orignal_error_message.nil? %>
+    <%= @orignal_error_message %><br />
+  <% end %>
+</div>

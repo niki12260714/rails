@@ -1,0 +1,83 @@
+<table class="table table-hover align-items-center table-sm table-striped">
+  <thead>
+    <tr>
+        <th scope="col" class="text-nowrap">渡す本</th>
+        <th scope="col" class="text-nowrap">受け取る本</th>
+        <th scope="col" class="text-nowrap">精算</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if @other_user_list.size != 0 %>
+      <% @other_user_list.each do |list| %>
+        <tr>
+          <td class="text-nowrap align-top">
+            <span class="font-weight-700 ">【<%= @targe_user.nickname %>→<%= list.target_user %>】</span>：<span class="text-warning"><%= list.pass_item_price.to_s %>円</span><br />
+            <% if list.pass_item.size != 0 %>
+              <% list.pass_item.each do |pitem| %>
+                <% if pitem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+                <%= pitem.item_name %>（<%= pitem.price %>円）×<%= pitem.count %>冊<br />
+              <% end %>
+            <% else %>
+              無し<br />
+            <% end %>
+            <% if list.pass_bad_item.size != 0 %>
+              <br /><span class="font-weight-700 ">【購入できなかった本】</span><br />
+              <% list.pass_bad_item.each do |pbitem| %>
+                <% if pbitem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+                <%= pbitem.item_name %><br />
+              <% end %>
+            <% end %>
+          </td>
+          <td class="text-nowrap align-top">
+            <span class="font-weight-700 ">【<%= list.target_user %>→<%= @targe_user.nickname %>】</span>：<span class="text-warning"><%= list.receive_item_price.to_s %>円</span><br />
+            <% if list.receive_item.size != 0 %>
+              <% list.receive_item.each do |ritem| %>
+                <% if ritem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+                <%= ritem.item_name %>（<%= ritem.price %>円）×<%= ritem.count %>冊<br />
+              <% end %>
+            <% else %>
+              無し<br />
+            <% end %>
+            <% if list.receive_bad_item.size != 0 %>
+              <br /><span class="font-weight-700 ">【購入できなかった本】】</span><br />
+              <% list.receive_bad_item.each do |rbitem| %>
+                <% if rbitem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+                <%= rbitem.item_name %><br />
+              <% end %>
+            <% end %>
+          </td>
+          <td class="text-nowrap align-top">
+            <% result_price = (list.pass_item_price.to_i - list.receive_item_price.to_i).abs  %>
+            <% if list.pass_item_price.to_i > list.receive_item_price.to_i %>
+              <span class="font-weight-700 "><%= list.target_user %>→<%= @targe_user.nickname %></span>へ<span class="text-warning"><%= result_price %></span>円
+            <% elsif list.pass_item_price.to_i < list.receive_item_price.to_i %>
+              <span class="font-weight-700 "><%= @targe_user.nickname %>→<%= list.target_user %></span>へ<span class="text-warning"><%= result_price %></span>円
+            <% else %>
+              精算必要無し
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+    <tr>
+      <td class="text-nowrap">
+        <span class="font-weight-700 ">【<%= @targe_user.nickname %>個人用】</span>：<span class="text-warning"><%= @own_list.pass_item_price.to_s %>円</span><br />
+        <% if @own_list.pass_item.size != 0 %>
+          <% @own_list.pass_item.each do |oitem| %>
+            <% if oitem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+            <%= oitem.item_name %>（<%= oitem.price %>円）×<%= oitem.count %>冊<br />
+          <% end %>
+        <% end %>
+        <% if @own_list.pass_bad_item.size != 0 %>
+          <br /><span class="font-weight-700 ">【購入できなかった本】</span><br />
+          <% @own_list.pass_bad_item.each do |pbitem| %>
+            <% if pbitem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+            <%= pbitem.item_name %><br />
+          <% end %>
+        <% end %>
+      </td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>

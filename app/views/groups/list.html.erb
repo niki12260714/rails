@@ -1,0 +1,56 @@
+<%= render 'layouts/message' %>
+<%= link_to new_group_path, class:"btn btn-primary" do %>
+  <i class="fas fa-plus"></i> 新規作成
+<% end %>
+<br />
+<br />
+<% if @group_list.size == 0 %>
+  予定しているイベントはありません。<br />
+  新規作成から参加予定のイベントを登録してから、購入アイテム、一緒に買う人を登録をしてください。
+<% else %>
+  <% @group_list.each do |group| %>
+    <div class="card">
+      <div class="card-header">
+        <h5 class="heading h5 mb-0">
+          <%= link_to 'plan/' + group.id.to_s do %>
+            <i class="fas fa-calendar-check"></i><%= group.group_name %>
+          <% end %>
+        </h5>
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">開催日：<%= l(group.purchase_day.to_date, format: :default) %></li>
+            <li class="list-group-item">備考：<%= group.group_memo %></li>
+            <li class="list-group-item">メンバー：<br />
+              <% group.group_members.each_with_index do |m, i| %>
+                <% if group.create_user_id == m.user_id %><i class="fas fa-graduation-cap text-warning"></i><% end %><%= m.user.nickname %><% if !m.join_status %>(招待中)<% end %>
+                <% if i != group.group_members.length - 1 %><br /><% end %>
+              <% end %>
+            </li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <% if group.create_user_id == current_user.id %>
+          <%= link_to edit_group_path(group), class:"btn btn-primary" do %>
+            <i class="fas fa-edit"></i> 編集
+          <% end %>
+          <%= link_to groups_invitation_path + '/' + group.id.to_s, remote: true, class:"btn btn-secondary" do %>
+            <i class="fas fa-user-plus"></i> 招待
+          <% end %>
+          <%= link_to group, method: :delete, data: { confirm: 'イベント計画を削除しますか？' }, class:"btn btn-danger" do %>
+            <i class="fas fa-trash-alt"></i> 削除
+          <% end %>
+        <% else %>
+          <%= link_to groups_leave_path + '/' + group.id.to_s, data: { confirm: 'イベント計画から退会しますか？' }, class:"btn btn-danger" do %>
+            <i class="fas fa-user-times"></i> 退会
+          <% end %>
+        <% end %>
+        <%= link_to groups_checkpay_path + '/' + group.id.to_s, class:"btn btn-primary" do %>
+          <i class="fas fa-dollar-sign"></i> 精算予定
+        <% end %>
+      </div>
+    </div>
+    <br />
+  <% end %>
+  <div id="group-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+<% end %>

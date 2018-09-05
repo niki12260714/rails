@@ -1,0 +1,16 @@
+<div class="card">
+  <div class="card-body">
+    <h5 class="heading heading-5 strong-600"><i class="fas fa-calendar-check"></i>イベント計画</h5>
+    <p class="card-text">
+      <% if @group_list.length > 0 %>
+        直近のイベント計画は【<%= @group_list.first.group_name %>】(<%= l(@group_list.first.purchase_day.to_date, format: :default) %>)です。<br />
+        購入予定のアイテムや一緒に買う人を登録しましょう。<br />
+      <% else %>
+        今日以降の参加予定イベントはありません。<br />
+        参加イベントを登録し、購入予定のアイテムや一緒に買う人を登録しましょう。<br />
+      <% end %>
+      <br />
+      <%= link_to "イベント計画", groups_path, class: "btn btn-sm btn-primary" %>
+    </p>
+  </div>
+</div>

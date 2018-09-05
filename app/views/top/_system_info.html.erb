@@ -1,0 +1,29 @@
+<div class="card">
+  <div class="card-body">
+    <h5 class="heading heading-5 strong-600"><i class="fas fa-info-circle"></i>システムからのお知らせ</h5>
+    <p class="card-text">
+      <% if @invite_info.length == 0 && @system_info.length == 0 %>
+        現在、お知らせはありません。
+      <% else %>
+        <ul class="list-group list-group-flush">
+          <% if @invite_info.length != 0 %>
+            <% @invite_info.each do |info| %>
+              <li class="list-group-item">
+                <%= l(info.created_at.to_date, format: :default) %>　【<%= info.group.user.nickname %>】さんがあなたを【<%= info.group.group_name %>】に招待しました。<br />
+                <%= link_to '確認', top_invitation_path + '/' + info.group.id.to_s + '/' + info.id.to_s, remote: true, class:"btn btn-primary"%>
+              </li>
+            <% end %>
+          <% end %>
+          <% if @system_info.length != 0 %>
+            <% @system_info.each do |info| %>
+              <li class="list-group-item">
+                <%= info.info_memo %>
+              </li>
+            <% end %>
+          <% end %>
+        </ul>
+      <% end %>
+      <div id="top-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+    </p>
+  </div>
+</div>

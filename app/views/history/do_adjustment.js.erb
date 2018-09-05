@@ -1,0 +1,11 @@
+<% if @errors.nil? and @orignal_error_message.nil? %>
+  $("#plan-modal").modal('hide');
+  $('.modal-backdrop').hide();
+  <% if @rtn == "history" %>
+    $("#history-result").html("<%= escape_javascript(render 'shopping/adjustment') %>")
+  <% else %>
+    location.reload();
+  <% end %>
+<% else %>
+  $("#modal_errors_area").html("<%= escape_javascript(render 'layouts/error') %>")
+<% end %>

@@ -1,0 +1,39 @@
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <h4 class="modal-title">【<%= @group.group_name %>】へユーザー招待</h4>
+    </div>
+    <div class="modal-body">
+      <%= form_tag( {controller: :groups, action: :search_member}, autocomplete: 'off', id: :fs, remote: true, class: "form-inline")do %>
+        <div class="btn-group-vertical mr-2">
+          <div class="btn-group">ID:<%= text_field_tag :system_id %></div>
+          <div class="btn-group"><%= check_box_tag 'twitter', true, false, {} %>twitter IDから探す</div>
+        </div>
+        <div class="btn-group">
+          <%= hidden_field_tag :group_id, @group.id %>
+          <%= button_tag( class: "btn btn-info btn-icon") do %>
+            <span class="btn-inner--icon"><i class="fas fa-search"></i></span>
+            <span class="btn-inner--text">検索</span>
+          <% end %>
+        </div>
+      <% end %>
+      <div id="search_result"></div>
+    </div>
+    <div class="modal-footer">
+      <%= form_tag( {controller: :groups, action: :insert_member}, id: :fm)do%>
+        <%= hidden_field_tag :invite_user_id %>
+        <%= hidden_field_tag :invite_user_name %>
+        <%= hidden_field_tag :group_id, @group.id %>
+        <%= button_tag( class: "btn btn-primary btn-icon", disabled: true, id: "invite_btn") do %>
+          <span class="btn-inner--icon"><i class="fas fa-user-plus"></i></span>
+          <span class="btn-inner--text">招待</span>
+        <% end %>
+        
+        <button type="button" class="btn btn-secondary btn-icon" data-dismiss="modal"><i class="fas fa-ban"></i>キャンセル</button>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,99 @@
+<%= render 'layouts/message' %>
+<button type="button" class="btn btn-sm btn-outline-info btn-icon" data-toggle="collapse" data-target="#sample">
+  <span class="btn-inner--icon"><i class="fas fa-question"></i></span>
+  <span class="btn-inner--text">入力説明</span>
+</button>
+<div id="sample" class="collapse">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="card">
+        <div class="card-body">
+          <p class="card-text">
+            <h6 class="heading heading-6 strong-600">購入できたら</h6>
+            〇ボタンを押して、購入した値段（1冊あたりです、トータルではありません）、冊数、ノベルティの有無を確認・修正して、決定ボタンを押してください。<br/>
+            <br />
+            <h6 class="heading heading-6 strong-600">必要数購入できなかったら</h6>
+            〇ボタンを押して、購入できた冊数を入力してください。<br />
+            イベントが終わって精算するときに、誰が購入できた分を受け取るか入力する画面が表示されるので、そこで設定してください。<br />
+            <small class="text-info">※本システムではこのような状態を「一部購入」と呼び、誰に割り振るかを「割当」と呼んでいます。</small><br />
+            <br />
+            <h6 class="heading heading-6 strong-600">購入できなかったら</h6>
+            1冊も購入できなかった場合、×ボタンを押して、購入不可にしてください。<br />
+            イベントが終わって精算すると、購入できなかったアイテムは個人アイテムに自動登録されます。<br />
+            次に買うイベントが決まったら、個人アイテムからイベント計画へアイテムを移動させることができます。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">追加のアイテムを登録</h6>
+            状況確認の画面から追加できます。<br />
+            状況確認のリストから、追加したいイベント名を選択して、移動先の画面から新規登録をしてください。<br />
+            なお、既にイベントが清算済みの場合、追加はできません。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">購入状況の確認・精算するには</h6>
+            購入状況のドロップダウンからイベント名をクリックすると、各イベントの確認画面に移動します。<br />
+            画面から状況の検索ができますので、ここから確認をしてください。<br />
+            精算をするには、精算のドロップダウンからイベント名をクリックし、精算画面に移動します。<br />
+            イベント作成者がイベントを「締め」たら、精算内容を確認できます。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<br /><br />
+<% if @item.size == 0 %>
+  本日の買出し予定のアイテムはありません
+<% else %>
+  <% if params[:sort].nil? or params[:sort] == "asc" then sort = "desc" else sort = "asc" end %>
+  <% if params[:sort].nil? or params[:sort] == "asc" then mark = "▲" else mark = "▼" end %>
+  <div class="row">
+    <div class="col">
+      <% if @pager_set != "all" %><%= will_paginate(@item, renderer: WillPaginate::ActionView::Bootstrap4LinkRenderer, previous_label: '&lt 前へ', next_label: '次へ &gt') %><% end %>
+    </div>
+    <div class="col">
+      <% @js = 'change_pager("sp_own","' + @col + '","' +  @sort + '", 0,0)' %>
+      <%= render 'layouts/pager' %>
+    </div>
+  </div>
+  <table class="table table-hover align-items-center table-sm">
+    <thead>
+      <tr>
+          <th scope="col" class="d-none d-sm-table-cell"><%= link_to "#", shopping_own_path + "/priority/" + sort %><% if params[:colum] == "priority" %><%= mark %><% end %></th>
+          <th><%= link_to "本の名前", shopping_own_path + "/item_name/" + sort %><% if params[:colum] == "item_name" %><%= mark %><% end %></th>
+          <th><%= link_to "スペース番号", shopping_own_path + "/space_number/" + sort %><% if params[:colum].nil? or params[:colum] == "space_number" %><%= mark %><% end %></th>
+          <th scope="col" class="d-none d-sm-table-cell"><%= link_to "サークル名", shopping_own_path + "/circle_name/" + sort %><% if params[:colum] == "circle_name" %><%= mark %><% end %></th>
+          <th scope="col" class="d-none d-sm-table-cell">値段</th>
+          <th>購入数</th>
+          <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @item.each do |p| %>
+        <tr>
+          <td class="d-none d-sm-table-cell"><%= p.priority.to_s %></td>
+          <td><% if p.item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %><%= link_to p.item.item_name, plan_display_path + '/' + p.id.to_s, remote: true %></td>
+          <td><%= p.block_number %>-<%= p.space_number %></td>
+          <td class="d-none d-sm-table-cell"><%= p.item.circle_name %></td>
+          <td class="d-none d-sm-table-cell"><% if p.item.price.nil?%>未設定<% else %><%= p.item.price.to_s %>円<% end %></td>
+          <td>
+            <% want_count_sum = 0 %>
+            <% p.purchase_members.each {|pm| want_count_sum += pm.want_count } %>
+            <%= want_count_sum.to_s %>
+          </td>
+          <td>
+            <div class="btn-group-vertical btn-group-xs">
+              <%= form_tag( {controller: :shopping, action: :save_bad}, id: :fs, class: "form-inline")do %>
+                <%= link_to '〇', shopping_status_path + '/' + p.id.to_s + '/' + want_count_sum.to_s, remote: true, class:"btn btn-primary btn-sm" %>
+                <%= hidden_field_tag 'p_id', p.id %>
+                <%= submit_tag "×", data: { confirm: '購入不可としますか？' }, class: "btn btn-danger", id: "btn btn-danger btn-s", name:"bad" %>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  
+  <% if @pager_set != "all" %><%= will_paginate(@item, renderer: WillPaginate::ActionView::Bootstrap4LinkRenderer, previous_label: '&lt 前へ', next_label: '次へ &gt') %><% end %>
+<% end %>
+<div id="shopping-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+<div id="plan-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+<div id="plan-display-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>

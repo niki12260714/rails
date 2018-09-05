@@ -1,0 +1,4 @@
+<% pager_list = [["10", "10"], ["30", "30"], ["50", "50"], ["全件", "all"]] %>
+<div class="float-right">
+  <%= select_tag 'pager', options_for_select(pager_list, selected: @pager_set), class: "dropdown", onchange: @js %>
+</div>

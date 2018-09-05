@@ -1,0 +1,40 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-secondary">
+  <div class="container">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <%= link_to shopping_own_path, class: "nav-link" do %>
+          <i class="fas fa-user"></i>購入担当
+        <% end %>
+      </li>
+      <% if @groups.length > 0 %>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbar_1_dropdown_1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-check"></i>状況確認
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbar_1_dropdown_1">
+            <% @groups.each do |g| %>
+              <%= link_to g.group_name, shopping_group_path + "/" + g.id.to_s, class: "dropdown-item" %>
+            <% end %>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbar_1_dropdown_1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-dollar-sign"></i>精算
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbar_1_dropdown_1">
+            <% @groups.each do |g| %>
+              <%= link_to g.group_name, shopping_result_path + "/" + g.id.to_s, class: "dropdown-item" %>
+            <% end %>
+          </div>
+        </li>
+      <% else %>
+        <li class="nav-item">
+          <a class="nav-link disabled" href="#"><i class="fas fa-check"></i>状況確認</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" href="#"><i class="fas fa-dollar-sign"></i>精算</a>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</nav>

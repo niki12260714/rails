@@ -1,0 +1,116 @@
+<div id="errors_area"></div>
+<%= render 'layouts/message' %>
+<button type="button" class="btn btn-sm btn-outline-info btn-icon" data-toggle="collapse" data-target="#sample">
+  <span class="btn-inner--icon"><i class="fas fa-question"></i></span>
+  <span class="btn-inner--text">入力説明</span>
+</button>
+<div id="sample" class="collapse">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="card">
+        <div class="card-body">
+          <p class="card-text">
+            <h6 class="heading heading-6 strong-600">個人メモとは</h6>
+            購入するイベントが決まっていないけれど、欲しいアイテムを登録しておく画面です。<br />
+            また、前回のイベントで購入できなかったアイテムが、ここに自動登録されます。<br />
+            イベントが決まったら、画面下の追加ボタンからイベント計画にアイテムを登録します。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">イベント計画に追加するには</h6>
+            移動させたいアイテムにチェックをいれ、画面下のイベント名を選択して追加ボタンをクリックします。<br />
+            「新規イベント作成」を選んだ場合は、イベント開催日を設定し、追加ボタンをクリックします。<br />
+            するとイベント計画画面に「新規イベント」という名前でイベント計画が自動的に作成され、アイテムが登録されます。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">イベント計画済みについて</h6>
+            自分が購入希望を出しているアイテムの一覧が、イベント計画毎に表示されます。<br />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<br /><br />
+<%= form_tag( {controller: :items, action: :search}, id: :fm, class: "form_group")do %>
+  <div class="form-group btn-toolbar">
+    <div class="input-group input-group-transparent">
+      <div class="btn-group mr-2">
+          <%= text_field_tag :keywords, @search_word, class: "form-control", size: 50, placeholder: "本の名前、サークル名、備考から検索", autocomplete: "off" %>
+          <span class="input-group-btn">
+            <%= button_tag( class: "btn btn-info btn-icon") do %>
+              <span class="btn-inner--icon"><i class="fas fa-search"></i></span>
+              <span class="btn-inner--text">検索</span>
+            <% end %>
+          </span>
+      </div>
+      <div class="btn-group">
+        <%= link_to items_new_path, class:"btn btn-primary" do %>
+          <i class="fas fa-plus"></i> 新規作成
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
+<br>
+<%= form_tag( {controller: :items, action: :insert_group}, id: :fm, remote: true, class: "form_group")do %>
+  <% if @items.length == 0 %>
+    <% if @search_word == "" %>未計画のアイテムはありません。<% else %>該当するアイテムはありません。<% end %>
+  <% else %>
+    <% if params[:sort].nil? or params[:sort] == "asc" then sort = "desc" else sort = "asc" end %>
+    <% if @sort == "asc" then mark = "▲" else mark = "▼" end %>
+    <div class="row">
+      <div class="col">
+        <% if @pager_set != "all" %><%= will_paginate(@item, renderer: WillPaginate::ActionView::Bootstrap4LinkRenderer, previous_label: '&lt 前へ', next_label: '次へ &gt') %><% end %>
+      </div>
+      <div class="col">
+        <% @js = 'change_pager("item","' + @col + '","' +  @sort + '", 0,0)' %>
+        <%= render 'layouts/pager' %>
+      </div>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+            <th scope="col"><input type="checkbox" id="all_items" onchange="item_change()"></th>
+            <th scope="col"><%= link_to "本の名前", items_list_path + "/item_name/" + sort %><% if @col == "item_name" %><%= mark %><% end %></th>
+            <th scope="col" class="d-none d-sm-table-cell"><%= link_to "サークル名", items_list_path + "/circle_name/" + sort %><% if @col == "circle_name" %><%= mark %><% end %></th>
+            <th scope="col" class="d-none d-sm-table-cell"><%= link_to "備考", items_list_path + "/item_memo/" + sort %><% if @col == "item_memo" %><%= mark %><% end %></th>
+            <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @items.each do |item| %>
+          <tr>
+            <td><%= check_box_tag 'item[]', item.id, false, {class: "items"} %></td>
+            <td><%= item.item_name %></td>
+            <td class="d-none d-sm-table-cell"><%= item.circle_name%></td>
+            <td class="d-none d-sm-table-cell"><%= item.item_memo %></td>
+            <td>
+              <div class="btn-group-vertical btn-group-xs">
+                <%= link_to items_edit_path + '/' + item.id.to_s, class:"btn btn-primary btn-sm" do %>
+                  <i class="fas fa-edit"></i> 編集
+                <% end %>
+                <%= link_to items_delete_path + '/' + item.id.to_s, data: { confirm: 'アイテムを削除しますか？' }, class:"btn btn-danger" do %>
+                  <i class="fas fa-trash-alt"></i> 削除
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @pager_set != "all" %><%= will_paginate(@item, renderer: WillPaginate::ActionView::Bootstrap4LinkRenderer, previous_label: '&lt 前へ', next_label: '次へ &gt') %><% end %>
+    <br />
+    <div class="row">
+      <div class="col-lg-4">
+        <%= collection_select(:group_id, :id, @own_group, :id, :group_name, {prompt: "新規イベント作成"}, {class: 'form-control'}) %>
+      </div>
+      <div class="col-lg-4">
+        <%= date_field_tag(:purchase_day, nil, class: "form-control") %>
+      </div>
+      <div class="col-lg-4">
+        <%= button_tag( class: "btn btn-outline-primary btn-icon") do %>
+          <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+          <span class="btn-inner--text">イベント計画に追加</span>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+<% end %>

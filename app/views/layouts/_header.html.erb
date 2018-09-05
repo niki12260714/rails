@@ -1,0 +1,64 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-green">
+  <div class="container">
+    <% if user_signed_in? %>
+      <%= link_to "バイレーツ", top_show_path, class: "navbar-brand" %><%= current_user.nickname %>
+    <% else %>
+      <%= link_to "バイレーツ", root_path, class: "navbar-brand" %>
+    <% end %>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_example_1" aria-controls="navbar_example_1" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbar_example_1">
+      <ul class="navbar-nav mr-auto">
+        <% if user_signed_in? %>
+          <li class="nav-item active">
+            <%= link_to groups_path, class: "nav-link" do %>
+              <i class="fas fa-calendar-check"></i>イベント計画
+            <% end %>
+          </li>
+          <li class="nav-item active">
+            <%= link_to shopping_own_path, class: "nav-link" do %>
+              <i class="fas fa-shopping-bag"></i>イベント当日
+            <% end %>
+          </li>
+          <li class="nav-item active">
+            <%= link_to history_path, class: "nav-link" do %>
+              <i class="fas fa-history"></i>履歴
+            <% end %>
+          </li>
+          <li class="nav-item active">
+            <%= link_to items_path, class: "nav-link" do %>
+              <i class="fas fa-folder-open"></i>個人メモ
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <% if user_signed_in? %>
+          <li class="nav-item active">
+            <%= link_to edit_user_registration_path, class: "nav-link" do %>
+              <i class="fas fa-user"></i>プロフィール編集
+            <% end %>
+          </li>
+          <li class="nav-item active">
+            <%= link_to destroy_user_session_path, method: "delete", class: "nav-link" do %>
+              <i class="fas fa-sign-out-alt"></i>ログアウト
+            <% end %>
+          </li>
+        <% else %>
+          <li class="nav-item active">
+            <%= link_to new_user_registration_path, class: "nav-link" do %>
+              <i class="fas fa-user"></i>ユーザー登録
+            <% end %>
+          </li>
+          <li class="nav-item active">
+            <%= link_to new_user_session_path, class: "nav-link" do %>
+              <i class="fas fa-sign-in-alt"></i>ログイン
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</nav>

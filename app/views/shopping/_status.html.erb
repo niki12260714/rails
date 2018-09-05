@@ -1,0 +1,36 @@
+<div class="modal-dialog">
+  <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">【<%= @ss.item_name %>】購入状況</h4>
+      </div>
+      <%= form_for @ss, url:{controller: :shopping, action: :save_status}, html: {autocomplete: 'off'}, data: {remote: true} do |form| %>
+        <div class="modal-body">
+          <div id="errors_area_status"></div>
+          <%= form.label :price %>
+          <%= form.number_field :price, id: :price, min: 0 %><br/>
+          <%= form.label :p_count %>
+          <%= form.number_field :p_count, id: :price, min: 1 %><br/>
+          <%= form.label :novelty_flg %>
+          <%= form.radio_button :novelty_flg, 2 %>無 <%= form.radio_button :novelty_flg, 1 %>有<br />
+          <%= form.hidden_field :max_count %>
+          <%= hidden_field_tag 'p_id', params[:p_id] %>
+          <% if !params[:rtn].nil? %>
+            <%= hidden_field_tag 'rtn', params[:rtn] %>
+            <%= hidden_field_tag 'g_id', params[:g_id] %>
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <span class="input-group-btn">
+            <%= button_tag( class: "btn btn-primary btn-icon") do %>
+              <span class="btn-inner--icon"><i class="fas fa-shopping-bag"></i></span>
+              <span class="btn-inner--text">購入確定</span>
+            <% end %>
+          </span>
+          <button type="button" class="btn btn-outline-dark" data-dismiss="modal"><i class="fas fa-ban"></i> キャンセル</button>
+        </div>
+      <% end %>
+  </div>
+</div>

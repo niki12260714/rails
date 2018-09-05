@@ -1,0 +1,5 @@
+<% if @errors.nil? %>
+  window.location.href = "/groups"
+<% else %>
+  $("#errors_area").html("<%= escape_javascript(render 'layouts/error') %>")
+<% end %>

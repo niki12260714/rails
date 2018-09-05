@@ -1,0 +1,18 @@
+<% if @g_log.size == 0 %>
+  ログはまだ生成されていません
+<% else %>
+  <div class="d-none d-sm-block">
+    <% @g_log.each do |log| %>
+      <%= log.log %><br />
+      (<%= l(log.created_at.to_time.to_datetime, format: :default) %>)<br />
+      <br />
+    <% end %>
+    <% if @g_log.size == 10 %>
+      ※最新10件を出力しました<br />
+    <% end %>
+  </div>
+  <% l_path = plan_log_path + '/' + params[:id] + '.csv' %>
+  <%= link_to l_path, class: "btn btn-outline-info" do %>
+    <i class="fas fa-download"></i>ログ出力
+  <% end %>
+<% end %>

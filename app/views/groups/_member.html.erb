@@ -1,0 +1,38 @@
+<% if request.path == "/groups/new"  %>
+  ※メンバーの設定はグループ作成後に行えます
+<% else %>
+  <% if @group_member.empty? %>
+    メンバーは存在しません。
+  <% else %>
+    <%= form_tag( {controller: :groups, action: :delete_member}, id: :fm)do%>
+      <div class="text-center"><h5>メンバー設定</h5></div>
+      <table class="table">
+        <tbody>
+          <% @group_member.each do |member| %>
+            <tr>
+              <th>
+                <% if member.user_id != current_user.id %>
+                  <%= check_box_tag 'member[]', member.user_id, false, {} %>
+                <% end %>
+              </th>
+              <% if member.provider == "twitter" then display_id = member.twitter_acount else display_id = member.system_id end %>
+              <th><%= member.nickname %>(ID:<%= display_id %>)
+                <% if !member.join_status %>
+                  【招待中】
+                <% end %>
+              </th>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <%= hidden_field_tag :id, @group.id %>
+      <% if @group_member.size > 1 %>
+        <%= button_tag( class: "btn btn-danger btn-icon") do %>
+          <span class="btn-inner--icon"><i class="fas fa-user-times"></i></span>
+          <span class="btn-inner--text">メンバー削除</span>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+

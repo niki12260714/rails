@@ -1,0 +1,137 @@
+<%= render 'layouts/message' %>
+<button type="button" class="btn btn-sm btn-outline-info btn-icon" data-toggle="collapse" data-target="#sample">
+  <span class="btn-inner--icon"><i class="fas fa-question"></i></span>
+  <span class="btn-inner--text">入力説明</span>
+</button>
+<div id="sample" class="collapse">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="card">
+        <div class="card-body">
+          <p class="card-text">
+            <h6 class="heading heading-6 strong-600">状況確認</h6>
+            ドロップダウンから見たい購入状況を選択し、検索ボタンを押してください。<br />
+            なお、「一部購入」とは、3冊購入する予定だったけれど、1冊しか買えなかったというような状況のことです。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">アイテム追加・編集</h6>
+            イベントが「締め」られていなければ、新しいアイテムが追加可能です。<br />
+            またアイテムの編集は、未購入であれば可能です。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">担当者を一括変更する</h6>
+            購入状況を「未購入」にして検索をすると、一覧にチェックボックスが表示されます。<br />
+            変更したいアイテムにチェックを入れ、画面下で変更する担当者名を選び、「担当変更」ボタンをクリックすると一括で変更されます。<br />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%= render 'plan/group_overview' %>
+<br /><br />
+<% if @group.end_flg %>
+  このイベント計画は締めました。精算確認をしてください。
+<% else %>
+  <div class="btn-toolbar">
+      <%= form_tag( {controller: :shopping, action: :search}, id: :fm, class: "form-inline")do %>
+        <div class="btn-group mr-2">
+          <%= select_tag 'search', options_for_select(@p_status, selected: @search), class: "form-control" %>
+          <%= select_tag 'member', options_for_select(@s_member, selected: @member), class: "form-control" %>
+          <%= button_tag( class: "btn btn-info btn-icon") do %>
+            <span class="btn-inner--icon"><i class="fas fa-search"></i></span>
+            <span class="btn-inner--text">検索</span>
+          <% end %>
+          <%= hidden_field_tag 'group_id', @group_id %>
+          <%= hidden_field_tag 'colum', @col %>
+          <%= hidden_field_tag 'sort', @sort %>
+        </div>
+      <% end %>
+      <% if !@group.end_flg %>
+        <div class="btn-group">
+          <%= link_to plan_new_path + '/' + @group.id.to_s, class:"btn btn-primary" do %>
+            <i class="fas fa-plus"></i> 新規作成
+          <% end %>
+        </div>
+      <% end %>
+  </div>
+  <br />
+  <% if !@item.nil? %>
+    <% if @item.size == 0 %>
+      該当するアイテムはありません。<br />
+    <% else %>
+      <% if @sort == "asc" then sort = "desc" else sort = "asc" end %>
+      <% if @sort == "asc" then mark = "▲" else mark = "▼" end %>
+      <div class="row">
+        <div class="col">
+          <% if @pager_set != "all" %><%= will_paginate(@item, renderer: WillPaginate::ActionView::Bootstrap4LinkRenderer, previous_label: '&lt 前へ', next_label: '次へ &gt') %><% end %>
+        </div>
+        <div class="col">
+          <% @js = 'change_pager("sp_group","' + @col + '","' +  @sort + '", ' + @group.id.to_s + ', ' + @search + ')' %>
+          <%= render 'layouts/pager' %>
+        </div>
+      </div>
+      <%= form_tag( {controller: :shopping, action: :change_member}, id: :fcm, class: "form-inline")do %>
+        <table class="table table-hover align-items-center table-sm">
+          <thead>
+            <tr>
+                <% if @search== "0" %><th scope="col"><input type="checkbox" id="all_items" onchange="item_change()"></th><% end %>
+                <th scope="col" class="d-none d-sm-table-cell"><%= link_to "#", shopping_group_path + "/" + @item.first.group_id.to_s + "/" + @search + "/" + @member + "/priority/" + sort %><% if @col == "priority" %><%= mark %><% end %></th>
+                <th scope="col"><%= link_to "本の名前", shopping_group_path + "/" + @item.first.group_id.to_s + "/" + @search + "/" + @member + "/item_name/" + sort %><% if @col == "item_name" %><%= mark %><% end %></th>
+                <th scope="col"><%= link_to "スペース番号", shopping_group_path + "/" + @item.first.group_id.to_s + "/" + @search + "/" + @member + "/space_number/" + sort %><% if @col == "space_number" %><%= mark %><% end %></th>
+                <th scope="col" class="d-none d-sm-table-cell"><%= link_to "サークル名", shopping_group_path + "/" + @item.first.group_id.to_s + "/" + @search + "/" + @member + "/circle_name/" + sort %><% if @col == "circle_name" %><%= mark %><% end %></th>
+                <th scope="col" class="d-none d-sm-table-cell"><%= link_to "購入担当者", shopping_group_path + "/" + @item.first.group_id.to_s + "/" + @search + "/" + @member + "/purchase_user_id/" + sort %><% if @col == "purchase_user_id" %><%= mark %><% end %></th>
+                <th scope="col"><%= link_to "状況", shopping_group_path + "/" + @item.first.group_id.to_s + "/" + @search + "/" + @member + "/item_purchase_status/" + sort %><% if @col == "item_purchase_status" %><%= mark %><% end %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @item.each do |p| %>
+              <tr>
+                <% if @search == "0" %><td><%= check_box_tag 'purchase[]', p.id, false, {class: "items"} %></td><% end %>
+                <td class="d-none d-sm-table-cell"><%= p.priority.to_s %></td>
+                <td>
+                  <% if p.item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+                  <% if p.item_purchase_status == 0 %>
+                    <%= link_to p.item.item_name, plan_edit_path + '/' + p.group_id.to_s + '/'  + p.item.id.to_s %>
+                  <% else %>
+                    <%= link_to p.item.item_name, plan_display_path + '/' + p.id.to_s, remote: true %>
+                  <% end %>
+                </td>
+                <td><%= p.block_number %>-<%= p.space_number %></td>
+                <td class="d-none d-sm-table-cell"><%= p.item.circle_name %></td>
+                <td class="d-none d-sm-table-cell"><% if p.purchase_user_id.nil? %>未設定<% else %><%= p.user.nickname %><% end %></td>
+                <td>
+                  <% case p.item_purchase_status %>
+                    <% when 0 then %>
+                      未購入
+                    <% when 1 then %>
+                      購入済み
+                    <% when 2 then %>
+                      購入不可
+                    <% else %>
+                      一部購入
+                   <% end %> 
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <% if @pager_set != "all" %><%= will_paginate(@item, renderer: WillPaginate::ActionView::Bootstrap4LinkRenderer, previous_label: '&lt 前へ', next_label: '次へ &gt') %><% end %>
+        <% if @search.to_s == "0" %>
+          <br />
+          <%= select_tag 'change_member', options_for_select(@s_member, selected: @member), class: "form-control" %>
+          <%= button_tag( class: "btn btn-info btn-icon") do %>
+            <span class="btn-inner--icon"><i class="fas fa-exchange-alt"></i></span>
+            <span class="btn-inner--text">担当変更</span>
+          <% end %>
+          <%= hidden_field_tag 'search', @search %>
+          <%= hidden_field_tag 'member', @member %>
+          <%= hidden_field_tag 'group_id', @group_id %>
+          <%= hidden_field_tag 'colum', @col %>
+          <%= hidden_field_tag 'sort', @sort %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <div id="plan-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+    <div id="shopping-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+    <div id="plan-display-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+  <% end %>
+<% end %>

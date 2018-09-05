@@ -1,0 +1,36 @@
+<div class="modal-dialog" style="z-index: 1500">
+  <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">【<%= @purchase.item.item_name %>】割当</h4>
+      </div>
+      <%= form_tag({controller: :history, action: :do_adjustment}, remote: true, id: :fs)do %>
+        <div class="modal-body">
+          <div id="modal_errors_area"></div>
+          購入数：<%= @purchase.purchase_count.to_s %><br />
+          <br />
+          <% @purchase.purchase_members.each do |pm| %>
+            <%= pm.user.nickname %>：<%= number_field_tag 'want_count[]', pm.want_count.to_i, min: 0 %>
+            <%= hidden_field_tag 'pm_id[]', pm.id %>
+            <br />
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <%= hidden_field_tag :p_id, @purchase.id %>
+          <%= hidden_field_tag :p_count, @purchase.purchase_count %>
+          <% if !params[:rtn].nil? %>
+            <%= hidden_field_tag :rtn, params[:rtn] %>
+          <% end %>
+          <span class="input-group-btn">
+            <%= button_tag( class: "btn btn-info btn-icon") do %>
+              <span class="btn-inner--icon"><i class="fas fa-share-alt"></i></span>
+              <span class="btn-inner--text">割当</span>
+            <% end %>
+          </span>
+          <button type="button" class="btn btn-outline-dark" data-dismiss="modal"><i class="fas fa-ban"></i> キャンセル</button>
+        </div>
+      <% end %>
+  </div>
+</div>

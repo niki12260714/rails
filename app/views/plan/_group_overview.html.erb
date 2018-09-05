@@ -1,0 +1,30 @@
+<a class="btn btn-sm btn-outline-info" data-toggle="collapse" href="#eventdetail" role="button" aria-expanded="false" aria-controls="eventdetail">
+  <i class="fas fa-info-circle"></i>【<%= @group.group_name %>】概要
+</a>
+<br />
+<div class="collapse" id="eventdetail">
+  <div class="card">
+  <div class="card-body">
+    開催日：<%= l(@group.purchase_day.to_date, format: :default) %><br />
+    メンバー：<% @g_member.each_with_index do |m, i| %>
+                <% if @group.create_user_id == m.user_id %><i class="fas fa-graduation-cap text-warning"></i><% end %><%= m.nickname %>さん<% if i != @g_member.length - 1 %>,<% end %>
+              <% end %><br />
+    備考：<%= @group.group_memo %>
+    <% if !@all_price.nil? %>
+      <br /><br />
+      <div class="row">
+        <div class="col-lg-3">【計画全体計】<%= @all_price %>円</div>
+        <div class="col-lg-3">【購入担当計】<%= @own_price %>円</div>
+        <div class="col-lg-3">【購入希望計】<%= @want_price %>円</div>
+        <div class="col-lg-3">
+          <% list_path = plan_list_path + '/' + params[:id] + '.csv' %>
+          <%= link_to list_path, class: "btn btn-outline-info" do %>
+            <i class="fas fa-download"></i>全アイテム出力
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  </div>
+</div>
+

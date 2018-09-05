@@ -1,0 +1,6 @@
+<% if @errors.nil? and @orignal_error_message.nil? %>
+  window.location.href = "<%= @r_path %>";
+<% else %>
+  $("#errors_area").html("<%= escape_javascript(render 'layouts/error') %>")
+  $('body, html').animate({ scrollTop: 0 }, 300, 'linear');
+<% end %>

@@ -1,0 +1,5 @@
+<% if @invitation_user.size == 0 %>
+  該当ユーザーが存在しません
+<% else %>
+  <%= @invitation_user.first.nickname %>さん<% if !@invitation_user.first.gid.nil? %>※招待済みです<% end %>
+<% end %>

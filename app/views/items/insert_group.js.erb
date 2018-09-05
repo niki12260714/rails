@@ -1,0 +1,5 @@
+<% if @errors.nil? and @orignal_error_message.nil? %>
+  location.reload();
+<% else %>
+  $("#errors_area").html("<%= escape_javascript(render 'layouts/error') %>")
+<% end %>

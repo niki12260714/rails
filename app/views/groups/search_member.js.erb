@@ -1,0 +1,10 @@
+$('#search_result').html("<%= j(render(:partial => 'search_result', :object => @invitation_user)) %>")
+<% if @invitation_user.size==1 && @invitation_user.first.gid.nil? %>
+  $("#invite_user_id").val("<%= @invitation_user.first.uid %>");
+  $("#invite_user_name").val("<%= @invitation_user.first.nickname %>");
+  $("#invite_btn").prop('disabled', false);
+<% else %>
+  $("#invite_user_id").val("");
+  $("#invite_user_name").val("");
+  $("#invite_btn").prop('disabled', true); 
+<% end %>

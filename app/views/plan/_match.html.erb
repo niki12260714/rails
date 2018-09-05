@@ -1,0 +1,33 @@
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <h4 class="modal-title">【<%= @o_item.item_name %>】へ一致</h4>
+    </div>
+    <% if @m_item.size != 0 %>
+      <%= form_tag( {controller: :plan, action: :do_match}, autocomplete: 'off', id: :fs)do %>
+        <div class="modal-body">
+          ※この操作は元に戻せません。慎重に行ってください。<br />
+          【一致先】<%= @o_item.item_name %>(サークル名：<%= @o_item.circle_name %>)<br />
+          ↑<br />
+          <%= collection_select(:m_i, :m_i, @m_item, :id, :item_name) %>
+        </div>
+        <div class="modal-footer">
+          <%= hidden_field_tag :group_id, params[:id] %>
+          <%= hidden_field_tag :item_id, params[:item_id] %>
+          <%= submit_tag "一致", class: "btn btn-primary", id: "invite_btn" %>
+          <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="modal-body">
+        一致させるアイテムがありません。
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+      </div>
+    <% end %>
+  </div>
+</div>

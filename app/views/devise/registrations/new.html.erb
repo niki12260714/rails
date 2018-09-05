@@ -1,0 +1,70 @@
+<h2><i class="fas fa-user"></i>ユーザー登録</h2>
+本システムを利用するにあたっては<%= link_to "利用規約", top_rulu_path, target: "_new" %>をご確認いただき、同意のうえで登録・認証を行ってください。<br />
+<br />
+<button type="button" class="btn btn-sm btn-outline-info btn-icon" data-toggle="collapse" data-target="#sample">
+    <span class="btn-inner--icon"><i class="fas fa-question"></i></span>
+    <span class="btn-inner--text">入力説明</span>
+</button>
+<div id="sample" class="collapse">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="card">
+        <div class="card-body">
+          <p class="card-text">
+            <h6 class="heading heading-6 strong-600">Eメール</h6>
+            ログインIDとして使用されます。<br />
+            登録後に、仮登録お知らせメールが入力されたアドレス宛に送られますので、メールに書かれたリンクから本登録をします。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">ユーザーID</h6>
+            イベントで共同購入する時のユーザー検索で使用します。<br />
+            半角英数とハイフン、アンダーバー、アットマークのみ使用可能。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">ニックネーム</h6>
+            イベントで共同購入するユーザー相手に表示される名前です。<br />
+            全角使用可能。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">パスワード</h6>
+            システムにログインするためのパスワード。<br />
+            半角英数と半角記号が使用可能で、<%= @minimum_password_length %>文字以上。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+  <%= devise_error_messages! %>
+
+  <div class="field">
+    <%= f.label :Eメール %><br />
+    <%= f.email_field :email, autofocus: true, autocomplete: "email", size: 50 %>
+  </div>
+  
+  <div class="field">
+    <%= f.label :ユーザーID %><small class="text-warning"> 50文字以内</small><br />
+    <%= f.text_field  :system_id, autocomplete: "off" %>
+  </div>
+  
+  <div class="field">
+    <%= f.label :ニックネーム %><small class="text-warning"> 20文字以内</small><br />
+    <%= f.text_field  :nickname, autocomplete: "off" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :パスワード %><small class="text-warning"> <%= @minimum_password_length %>文字以上</small><br />
+    <%= f.password_field :password, autocomplete: "off" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :確認用パスワード %><br />
+    <%= f.password_field :password_confirmation, autocomplete: "off" %>
+  </div>
+
+  <div class="actions">
+    <%= button_tag( class: "btn btn-primary btn-icon") do %>
+      <span class="btn-inner--icon"><i class="fas fa-user"></i></span>
+      <span class="btn-inner--text">ユーザー登録</span>
+    <% end %>
+  </div>
+<% end %>
+<%= render "devise/shared/links" %>

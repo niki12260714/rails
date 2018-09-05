@@ -1,0 +1,144 @@
+<button type="button" class="btn btn-sm btn-outline-info btn-icon" data-toggle="collapse" data-target="#sample">
+  <span class="btn-inner--icon"><i class="fas fa-question"></i></span>
+  <span class="btn-inner--text">入力説明</span>
+</button>
+<div id="sample" class="collapse">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="card">
+        <div class="card-body">
+          <p class="card-text">
+            <h6 class="heading heading-6 strong-600">購入するものを追加する</h6>
+            新規作成ボタンから、購入したいアイテムの情報を追加します。<br/>
+            または、個人メモ画面から、イベント計画にアイテムを追加させます。<br/>
+            <small>個人メモからの移動は、個人メモ画面から行ってください。</small><br/>
+            <br />
+            <h6 class="heading heading-6 strong-600">重複したアイテムを登録したら</h6>
+            メンバーのAさん、Bさんが同時に同じアイテムを登録してしまった場合、「一致」させることで重複を解除できます。<br />
+            一致させたいどちらかのアイテムの「一致」ボタンを押すと、イベント計画に登録されているアイテムがリストで表示されます。<br />
+            ここから重複したアイテムを選ぶと、一つのアイテムとなり、購入希望をまとめることができます。<br/>
+            <br />
+            <h6 class="heading heading-6 strong-600">イベント開催日より前に購入したら</h6>
+            通販などで、イベント開催日より前に購入した場合、履歴画面から購入情報が登録可能です。<br/>
+            <br />
+            <h6 class="heading heading-6 strong-600">登録したアイテムの一覧を印刷したい</h6>
+            グループ概要のボタンをクリックすると、全アイテム出力ボタンがあり、CSVファイルが出力されます。<br />
+            このファイルをExcelなどを使って、自由にカスタマイズして、印刷してください。<br />
+            <br />
+            <h6 class="heading heading-6 strong-600">精算予定を確認したい</h6>
+            グループ概要のボタンをクリックすると、イベント計画の総合計金額【計画全体計】、<br/>
+            自分が購入担当となっているアイテムの総合計金額【購入担当計】、<br/>
+            自分が購入希望を出しているアイテムの総合計金額【購入希望計】を見ることができます。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%= render 'plan/group_overview' %>
+<br />
+<div>
+  <div class="btn-toolbar">
+    <%= form_tag( {controller: :plan, action: :search}, id: :fs, class: "form-inline")do %>
+      <div class="btn-group mr-2">
+        <%= select_tag 'search', options_for_select(@search_list, selected: @search), class: "form-control" %>
+        <%= hidden_field_tag 'group_id', params[:id] %>
+        <%= hidden_field_tag 'colum', @col %>
+        <%= hidden_field_tag 'sort', @sort %>
+        <span class="input-group-btn">
+          <%= button_tag( class: "btn btn-info btn-icon") do %>
+            <span class="btn-inner--icon"><i class="fas fa-search"></i></span>
+            <span class="btn-inner--text">検索</span>
+          <% end %>
+        </span>
+      </div>
+    <% end %>
+    <div class="btn-group">
+      <%= link_to plan_new_path + '/' + @group.id.to_s, class:"btn btn-primary" do %>
+        <i class="fas fa-plus"></i> 新規作成
+      <% end %>
+    </div>
+  </div>
+  <% if @g_item.size == 0 %>
+    買出し予定のアイテムはありません
+  <% else %>
+   <br />
+    <% if params[:sort].nil? or params[:sort] == "asc" then sort = "desc" else sort = "asc" end %>
+    <% if @sort == "asc" then mark = "▲" else mark = "▼" end %>
+    <div class="row">
+      <div class="col">
+        <% if @pager_set != "all" %><%= will_paginate(@g_item, renderer: WillPaginate::ActionView::Bootstrap4LinkRenderer, previous_label: '&lt 前へ', next_label: '次へ &gt') %><% end %>
+      </div>
+      <div class="col">
+        <% @js = 'change_pager("plan","' + @col + '","' +  @sort + '",' + params[:id] + ',' + @search + ')' %>
+        <%= render 'layouts/pager' %>
+      </div>
+    </div>
+    <table class="table table-hover align-items-center table-sm">
+      <thead>
+        <tr>
+            <th scope="col" class="d-none d-sm-table-cell"><%= link_to "#", plan_path + "/" + params[:id] + "/priority/" + sort + "/" + @search %><% if @col == "priority" %><%= mark %><% end %></th>
+            <th scope="col"><%= link_to "本の名前", plan_path + "/" + params[:id] + "/item_name/" + sort + "/" + @search %><% if @col == "item_name" %><%= mark %><% end %></th>
+            <th scope="col"><%= link_to "スペース番号", plan_path + "/" + params[:id] + "/space_number/" + sort + "/" + @search %><% if @col == "space_number" %><%= mark %><% end %></th>
+            <th scope="col" class="d-none d-sm-table-cell"><%= link_to "サークル名", plan_path + "/" + params[:id] + "/circle_name/" + sort + "/" + @search %><% if @col == "circle_name" %><%= mark %><% end %></th>
+            <th scope="col" class="d-none d-sm-table-cell">値段</th>
+            <th scope="col" class="d-none d-sm-table-cell">購入希望</th>
+            <th scope="col" class="d-none d-sm-table-cell">総数</th>
+            <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @g_item.each do |p| %>
+          <% want_count_sum = 0 %>
+          <tr>
+            <td class="d-none d-sm-table-cell"><%= p.priority.to_s %></td>
+            <td><% if p.item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %><%= p.item.item_name %></td>
+            <td><%= p.block_number %>-<%= p.space_number %></td>
+            <td class="d-none d-sm-table-cell"><%= p.item.circle_name %></td>
+            <td class="d-none d-sm-table-cell"><% if p.item.price.nil? %>未設定<% else %><%= p.item.price.to_s %>円<% end %></td>
+            <td class="d-none d-sm-table-cell">
+              <% p.purchase_members.each do |pm| %>
+                <%= pm.user.nickname %>(<%= pm.want_count.to_s %>)<% if p.purchase_user_id == pm.user_id %><i class="fas fa-shopping-bag text-danger"></i><% end %><br />
+                <% want_count_sum += pm.want_count %>
+              <% end %>
+            </td>
+            <td class="d-none d-sm-table-cell"><%= want_count_sum.to_s %></td>
+            <td>
+              <% if p.item_purchase_status.to_i == 0 %>
+                <div class="btn-group">
+                  <div class="btn-group-vertical btn-group-xs">
+                    <%= link_to plan_edit_path + '/' + p.group_id.to_s + '/' + p.item_id.to_s, class:"btn btn-primary btn-sm" do %>
+                      <i class="fas fa-edit"></i> 編集
+                    <% end %>
+                    <%= link_to plan_match_path + '/' + p.group_id.to_s + '/' + p.item_id.to_s, remote: true, class:"btn btn-block btn-outline-dark btn-sm" do %>
+                      <i class="fas fa-american-sign-language-interpreting"></i> 一致
+                    <% end %>
+                  </div>
+  
+                  <div class="btn-group-vertical btn-group-xs">
+                    <%= link_to plan_delete_path + '/' + p.group_id.to_s + '/' + p.item_id.to_s, method: :delete, data: { confirm: 'アイテムを削除しますか？' }, class:"btn btn-danger btn-sm" do %>
+                      <i class="fas fa-trash-alt"></i> 削除
+                    <% end %>
+                    <%= form_tag( {controller: :plan, action: :rtn_personal}, id: :fps)do %>
+                      <%= hidden_field_tag 'item_id', p.item_id.to_s %>
+                      <%= hidden_field_tag 'group_id', p.group_id.to_s %>
+                      <%= button_tag( class: "btn btn-block btn-outline-info btn-sm", data: { confirm: '個人メモに戻しますか？' }) do %>
+                        <span class="btn-inner--icon"><i class="fas fa-undo-alt"></i></span>
+                        <span class="btn-inner--text">戻し</span>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
+              <% else %>
+                購入済み
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    
+    <% if @pager_set != "all" %><%= will_paginate(@g_item, renderer: WillPaginate::ActionView::Bootstrap4LinkRenderer, previous_label: '&lt 前へ', next_label: '次へ &gt') %><% end %>
+  <% end %>
+</div>
+<div id="plan-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>

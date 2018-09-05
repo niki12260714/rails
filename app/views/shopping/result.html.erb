@@ -1,0 +1,9 @@
+<% if !@group.end_flg %>
+  <%= render 'end_list' %>
+<% elsif @purchase.size != 0 %>
+  <%= render 'adjustment' %>
+<% else %>
+  <%= render 'plan/group_overview' %>
+  <br />
+  <%= render 'history/result_list' %>
+<% end %>

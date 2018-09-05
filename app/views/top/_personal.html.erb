@@ -1,0 +1,16 @@
+<div class="card">
+  <div class="card-body">
+    <h5 class="heading heading-5 strong-600"><i class="fas fa-folder-open"></i>個人メモ</h5>
+    <p class="card-text">
+      <% if @items.length > 0 %>
+        個人メモには<%= @items.length.to_s %>件のアイテムがあります。<br />
+      <% else %>
+        個人メモには、購入するイベントがまだ決まっていないアイテムを登録できます。<br />
+        また、イベントで購入できなかったアイテムが自動登録されます。<br />
+      <% end %>
+      購入イベントが決まったら、個人メモからイベント計画へ追加しましょう。<br />
+      <br />
+      <%= link_to "個人メモ", items_path, class: "btn btn-sm btn-primary" %>
+    </p>
+  </div>
+</div>

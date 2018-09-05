@@ -1,0 +1,34 @@
+<h3><% if @item.mode == "new" %>新規作成<% else %>【<%= @item.item_name %>】編集<% end %></h3>
+<%= form_for @item, url:{controller: :items, action: :save_data}, html: {autocomplete: 'off', class: "form-group"}, data: {remote: true} do |form| %>
+  <div>
+    <div id="errors_area"></div>
+    <%= form.label :item_name %><small class="text-warning"> 必須、100文字以内</small>
+    <%= form.text_field :item_name, id: :item_name, size: 50, class: "form-control", autocomplete: 'off', maxlength: 100 ,placeholder: "未発表の場合、『新刊』など任意の名前を設定し、後から変更してください" %><br/>
+    <%= form.label :circle_name %><small class="text-warning"> 30文字以内</small>
+    <%= form.text_field :circle_name, id: :circle_name, class: "form-control", maxlength: 30 %><br/>
+    <%= form.label :price %>
+    <%= form.number_field :price, id: :price, min: 0, class: "form-control" %><br/>
+    <%= form.label :novelty_flg %>
+    <%= form.radio_button :novelty_flg, 2 %>無 <%= form.radio_button :novelty_flg, 1 %>有 <%= form.radio_button :novelty_flg, 0 %>不明<br />
+    <%= form.label :item_memo %><small class="text-warning"> 100文字以内</small>
+    <%= form.text_area :item_memo, id: :itemmemo, class: "form-control", size: "10x5", maxlength: 100 %><br/>
+    <%= form.label :want_count %>
+    <%= form.number_field :want_count, id: :want_count, min: 1, class: "form-control" %><br />
+    <%= form.hidden_field :mode %>
+    <%= form.hidden_field :item_id %>
+  </div>
+  <div>
+    <%= button_tag(class: "btn btn-primary btn-icon") do %>
+      <% if @item.mode == "new" %>
+        <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+        <span class="btn-inner--text">新規作成</span>
+      <% else %>
+        <span class="btn-inner--icon"><i class="fas fa-edit"></i></span>
+        <span class="btn-inner--text">編集</span>
+      <% end %>
+    <% end %>
+    <%= link_to items_list_path, class:"btn btn-outline-dark" do %>
+      <i class="fas fa-ban"></i> キャンセル
+    <% end %>
+  </div>
+<% end %>

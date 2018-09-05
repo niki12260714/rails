@@ -1,0 +1,31 @@
+<%= form_with(model: group, local: false, multipart: true) do |form| %>
+  <div id="errors_area"></div>
+  <div class="actions">
+    <div class="field">
+      <%= form.label :group_name %><small class="text-warning"> 20文字以内</small>
+      <%= form.text_field :group_name, id: :group_group_name, autocomplete: "off", size: 20, maxlength: 20, class: "form-control",placeholder: "夏コミ、冬コミ、〇ジャンル購入など" %>
+    </div>
+    <div class="field">
+      <%= form.label :purchase_day %><small class="text-warning"> 今日以降</small>
+      <%= form.date_field :purchase_day, id: :group_purchase_day, class: "form-control" %>
+    </div>
+    <div class="field">
+      <%= form.label :group_memo %><small class="text-warning"> 400文字以内</small>
+      <%= form.text_area :group_memo, id: :group_group_memo, autocomplete: "off", class: "form-control", size: "10x5", maxlength: 400, placeholder: "待ち合わせ場所、精算方法などをメモできます" %>
+    </div>
+    <br />
+    <div class="actions">
+      <%= button_tag( class: "btn btn-primary btn-icon") do %>
+        <% if request.path == "/groups/new"  %>
+          <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+          <span class="btn-inner--text">新規作成</span>
+        <% else %>
+          <span class="btn-inner--icon"><i class="fas fa-edit"></i></span>
+          <span class="btn-inner--text">編集</span>
+        <% end %>
+      <% end %>
+      
+    </div>
+  </div>
+<% end %>
+<br />

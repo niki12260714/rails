@@ -1,0 +1,25 @@
+<%= render 'layouts/message' %>
+<div id="errors_area"></div>
+<%= form_tag( {controller: :history, action: :search}, id: :fs, remote: true, class: "form_group")do %>
+  <div class="row">
+    <div class="col-lg-3">
+      <%= select_tag 'date_select', options_for_select(@date_array), onchange: 'change_data("date_select", "group_select")', class: "form-control" %>
+    </div>
+    <div class="col-lg-3">
+      <%= select_tag 'group_select', options_for_select(@group_array), onchange: 'change_data("group_select", "member_select")', class: "form-control" %>
+    </div>
+    <div class="col-lg-3">
+      <%= select_tag 'member_select', options_for_select(@member_array), class: "form-control" %>
+    </div>
+    <div class="col-lg-3">
+      <span class="input-group-btn">
+        <%= button_tag( class: "btn btn-info btn-icon") do %>
+          <span class="btn-inner--icon"><i class="fas fa-search"></i></span>
+          <span class="btn-inner--text">検索</span>
+        <% end %>
+      </span>
+    </div>
+  </div>
+<% end %>
+<br />
+<div id="history-result"></div>

@@ -1,0 +1,62 @@
+<h3><% if @plan.mode == "new" %>新規作成<% else %>【<%= @plan.item_name %>】編集<% end %></h3>
+<%= form_for @plan, url:{controller: :plan, action: :save_data}, html: {autocomplete: 'off', class: "form-group"}, data: {remote: true} do |form| %>
+  <div>
+    <div id="errors_area"></div>
+    <%= form.label :item_name %><small class="text-warning"> 必須、100文字以内</small>
+    <%= form.text_field :item_name, id: :item_name, size: 50, class: "form-control", autocomplete: 'off', maxlength: 100 ,placeholder: "未発表の場合、『新刊』など任意の名前を設定し、後から変更してください" %><br/>
+    <%= form.label :block_space %> 
+    <div class="form-group row">
+      <div class="col-sm-2">
+        <small><%= form.label :block_number %></small><small class="text-warning"> 1文字</small>
+        <%= form.text_field :block_number, id: :block_number, class: "form-control", placeholder: "あ,Aなど", maxlength: 1 %>
+      </div>
+      <div class="col-sm-10">
+        <small><%= form.label :space_number %></small><small class="text-warning"> 30文字以内</small>
+        <%= form.text_field :space_number, id: :space_number, class: "form-control", placeholder: "01aなど", maxlength: 30 %>
+      </div>
+    </div>
+    <small class="form-text text-muted">スペース番号は「ブロック番号 + 配置番号」となります。例えば「あ01a」ならば、ブロック番号に「あ」、配置番号に「01a」と入力します。<br />
+    スペース番号でソートする都合上、ブロック番号は全角英字は半角に変換して登録されますが、カタカナひらがなは入力された値のまま登録し、ソートします。<br />
+    企業スペースやオンリーなど、ブロック番号が無い場合は、ブロック番号は空白にし、配置番号だけ入力してください。</small>
+    <br/>
+    <%= form.label :circle_name %><small class="text-warning"> 30文字以内</small>
+    <%= form.text_field :circle_name, id: :circle_name, class: "form-control", maxlength: 30 %><br/>
+    <%= form.label :price %>
+    <%= form.number_field :price, id: :price, min: 0, class: "form-control" %><br/>
+    <%= form.label :novelty_flg %>
+    <%= form.radio_button :novelty_flg, 2 %>無 <%= form.radio_button :novelty_flg, 1 %>有 <%= form.radio_button :novelty_flg, 0 %>不明<br />
+    <%= form.label :item_memo %><small class="text-warning"> 100文字以内</small>
+    <%= form.text_area :item_memo, id: :itemmemo, class: "form-control", size: "10x5", maxlength: 100 %><br/>
+    <%= form.label :purchase_user_id %>
+    <%= form.select :purchase_user_id, @group_member.map{|t| [t.nickname, t.user_id]}, {include_blank: true}, {class: "form-control"} %><br/>
+    <%= form.label :priority %><small class="text-warning"> 数字のみ</small>
+    <%= form.number_field :priority, size: 3, min: 0, class: "form-control" %><br/>
+    <br/>
+    <%= form.label :want_count %><br />
+    <% @group_member.each do |gm| %>
+      <% if @plan.mode == "new" && gm.user_id == current_user.id then init_cnt = 1 else init_cnt = gm.want_count.to_i end %>
+      <%= gm.nickname %>：<%= number_field_tag 'want_count[]', init_cnt, min: 0, class: "form-control" %>
+      <%= hidden_field_tag 'want_id[]', gm.user_id %>
+      <br/>
+    <% end %>
+    <%= form.hidden_field :group_id %>
+    <%= form.hidden_field :mode %>
+    <%= form.hidden_field :cr %>
+    <%= form.hidden_field :ac %>
+    <%= form.hidden_field :item_id %>
+  </div>
+  <div>
+    <%= button_tag(class: "btn btn-primary btn-icon") do %>
+      <% if @plan.mode == "new" %>
+        <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+        <span class="btn-inner--text">新規作成</span>
+      <% else %>
+        <span class="btn-inner--icon"><i class="fas fa-edit"></i></span>
+        <span class="btn-inner--text">編集</span>
+      <% end %>
+    <% end %>
+    <%= link_to session[:request_from], class:"btn btn-outline-dark" do %>
+      <i class="fas fa-ban"></i> キャンセル
+    <% end %>
+  </div>
+<% end %>

@@ -1,0 +1,23 @@
+<% if @group_items.length == 0 %>
+  イベント計画済みのアイテムはありません
+<% else %>
+  <% @group_items.each do |group| %>
+    <div class="card">
+      <div class="card-header">
+        <a data-toggle="collapse" href="#list<%= group.group_id %>" role="button" aria-expanded="false" aria-controls="list<%= group.group_id %>">
+          <%= group.group_name %>(<%= l(group.purchase_day.to_date, format: :default) %>)<span class="badge badge-lg badge-pill badge-info text-uppercase"><%= group.item_list.length %></span>
+        </a>
+      </div>
+      <div class="collapse" id="list<%= group.group_id %>">
+        <div class="card-body">
+          <% group.item_list.zip(group.purchase_id_list, group.circle_list).each do |item, p_id, circle| %>
+            <%= link_to item, plan_display_path + '/' + p_id.to_s, remote: true %>
+            <% if circle != "" %>(<%= circle %>)<% end %>
+            <br />
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+<% end %>
+<div id="plan-display-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>

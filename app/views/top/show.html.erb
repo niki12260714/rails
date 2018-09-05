@@ -1,0 +1,33 @@
+<%= render 'layouts/message' %>
+<div class="row">
+  <div class="col-lg-4">
+    <% if @purchase_group_info.length > 0 %>
+      <%= render 'event_today' %>
+    <% else %>
+      <%= render 'system_info' %>
+    <% end %>
+  </div>
+  <div class="col-lg-4">
+    <% if @purchase_group_info.length > 0 %>
+      <%= render 'system_info' %>
+    <% else %>
+      <%= render 'event_plan' %>
+    <% end %>
+  </div>
+  <div class="col-lg-4">
+    <% if @purchase_group_info.length > 0 %>
+      <%= render 'event_plan' %>
+    <% else %>
+      <%= render 'personal' %>
+    <% end %>
+  </div>
+</div>
+<% if @purchase_group_info.length > 0 %>
+  <br />
+  <div class="row">
+    <div class="col-lg-4">
+      <%= render 'personal' %>
+    </div>
+    <div class="col-lg-8"></div>
+  </div>
+<% end %>

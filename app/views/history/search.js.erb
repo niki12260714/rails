@@ -1,0 +1,9 @@
+<% if !@errors.nil? %>
+  $("#errors_area").html("<%= escape_javascript(render 'layouts/error') %>")
+<% elsif !@group_chk.end_flg %>
+  $("#history-result").html("<%= escape_javascript(render 'shopping/end_list') %>")
+<% elsif @purchase.length != 0 %>
+  $("#history-result").html("<%= escape_javascript(render 'shopping/adjustment') %>")
+<% else %>
+  $("#history-result").html("<%= escape_javascript(render 'result_list') %>")
+<% end %>

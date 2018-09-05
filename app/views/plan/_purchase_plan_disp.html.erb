@@ -1,0 +1,33 @@
+<div class="modal-dialog">
+  <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">【<%= @purchase.item.item_name %>】計画</h4>
+      </div>
+      <div class="modal-body">
+          本の名前：
+          <%= @purchase.item.item_name %><br/>
+          スペース番号：
+          <%= @purchase.space_number %><br/>
+          サークル名：
+          <%= @purchase.item.circle_name %><br/>
+          値段：
+          <% if @purchase.item.price.to_i == 0 %>未設定<% else %><%= @purchase.item.price.to_s %><% end %><br/>
+          備考：
+          <%= @purchase.item.item_memo %><br/>
+          購入担当：
+          <% if @purchase.purchase_user_id.nil? %>未設定<% else %><%= @purchase.user.nickname %><% end %><br/>
+          優先度：
+          <% if @purchase.priority.nil? %>未設定<% elsif @purchase.priority.to_i == 1 %>最優先<% else %><%= @purchase.priority.to_s %>番目<% end %><br/>
+          購入希望<br />
+          <% @purchase.purchase_members.each do |pm| %>
+            <%= pm.user.nickname %>×<%= pm.want_count.to_s %>冊<br/>
+          <% end %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+      </div>
+  </div>
+</div>
