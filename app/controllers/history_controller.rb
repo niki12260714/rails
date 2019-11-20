@@ -37,6 +37,9 @@ class HistoryController < ApplicationController
       @errors = chk_model.errors
       return
     end
+    #正常ならば、パラメータをセッションに保持する
+    session["history_group"] = params[:group_select]
+    session["history_member"] = params[:member_select]
     
     #グループ概要取得
     get_group_overview(params[:group_select])
@@ -53,7 +56,9 @@ class HistoryController < ApplicationController
     #一部購入のデータを取得する
     get_part_items(params[:group_select])
     if @purchase.size == 0
+      #一部購入が無ければ、最終精算画面を表示
       get_result_items(params[:group_select], params[:member_select], 1)
+      @u_id = params[:member_select]
     end
   end
   
@@ -97,6 +102,31 @@ class HistoryController < ApplicationController
     #以下トランザクションで失敗した時の挙動記述
     rescue => e
       @orignal_error_message = e.message
+  end
+  
+  def circle_list
+    #全アイテム情報出力出力
+    @g_item = Purchase.where(group_id: params[:id]).joins(:item).preload(:item).distinct
+    respond_to do |format|
+      format.html
+      format.csv do
+        filename = "一括登録用サークル一覧"
+        headers['Content-Disposition'] = "attachment; filename=\"#{filename}.csv\""
+      end
+    end
+  end
+  
+  def result_list
+    #購入結果出力
+    @g_item = PurchaseMember.where(user_id: params[:u_id], group_id: params[:g_id]).where.not(want_count: 0).joins(:purchase).joins(:item).where("purchases.item_purchase_status = ?", 1).distinct
+    g_info = Group.find_by(id: params[:g_id])
+    respond_to do |format|
+      format.html
+      format.csv do
+        filename = "購入結果(#{g_info.group_name})"
+        headers['Content-Disposition'] = "attachment; filename=\"#{filename}.csv\""
+      end
+    end
   end
   
   private

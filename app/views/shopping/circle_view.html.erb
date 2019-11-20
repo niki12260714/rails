@@ -1,0 +1,44 @@
+<small class="text-warning">配置番号、サークル名が入力されていないアイテムは表示されません。</small>
+<% if @block_list.length == 0 %>
+  本日の買出し予定のアイテムはありません
+<% else %>
+  <%= collection_select(:block_number, :block_number, @block_list, :block_number, :block_display, {selected: @selected_block}, {class: 'form-control', onchange: 'change_block()'}) %>
+  <br />
+  <% if @item.length == 0 then %>
+      このブロックでの購入は終了しました。
+  <% else %>
+      <% @item.each do |cv| %>
+        <div class="card">
+          <div class="card-header">
+            <h5 class="heading h5 mb-0">
+              <%= form_tag( {controller: :shopping, action: :circle_view_detail}, id: :fm, class: "form_group")do %>
+                <%= hidden_field_tag 'item_ids', cv.item_id_array.to_s.slice(1..cv.item_id_array.to_s.length-2).gsub(/\s/, '') %>
+                <%= hidden_field_tag 'join_circle_number', cv.join_circle_number %>
+                <%= hidden_field_tag 'circle_name_first', cv.circle_name_array[0] %>
+                <%= hidden_field_tag 'display_block_no', @selected_block %>
+                <% unless params[:mode].nil? %>
+                  <%= hidden_field_tag 'mode', params[:mode].to_s %>
+                  <%= hidden_field_tag 'id', params[:id].to_s %>
+                <% end %>
+                <%= button_tag(cv.join_circle_number, class: "btn btn-link") %>
+              <% end %>
+            </h5>
+          </div>
+          <div class="card-body">
+            <% cv.circle_name_array.each do |cn| %>
+              <% if cn.to_s.length > 0 %><%= "【#{cn}】" %><br /><% end %>
+            <% end %>
+            <%= "#{cv.type_num}種類、#{cv.total_num}冊、#{cv.total_price}円" %>
+          </div>
+        </div>
+        <br />
+      <% end %>
+  <% end %>
+  <%= form_tag( {controller: :shopping, action: :circle_view}, id: :block_form)do %>
+    <%= hidden_field_tag 'block_no' %>
+    <% unless params[:mode].nil? %>
+      <%= hidden_field_tag 'mode', params[:mode].to_s %>
+      <%= hidden_field_tag 'id', params[:id].to_s %>
+    <% end %>
+  <% end %>
+<% end %>

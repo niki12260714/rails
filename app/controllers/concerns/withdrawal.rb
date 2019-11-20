@@ -69,7 +69,8 @@ module Withdrawal
     origin_item = Item.find_by(id: o_item_id)
     oritin_pm = PurchaseMember.find_by(item_id: o_item_id, user_id: o_user_id, group_id: o_group_id)
     #新しいitemとpurchase_membersを作成する
-    new_item = Item.new(item_name: origin_item.item_name, circle_name: origin_item.circle_name, price: origin_item.circle_name, item_memo: origin_item.item_memo, novelty_flg: origin_item.novelty_flg)
+    new_item = Item.new(item_name: origin_item.item_name, circle_name: origin_item.circle_name, price: origin_item.circle_name, \
+                        item_memo: origin_item.item_memo, novelty_flg: origin_item.novelty_flg, item_label: origin_item.item_label, item_url: origin_item.item_url)
     new_item.purchase_members.build(group_id: nil,user_id: o_user_id, want_count: oritin_pm.want_count)
     #アイテム保存
     new_item.save!

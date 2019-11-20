@@ -1,14 +1,17 @@
-<footer class="navbar navbar-expand-lg navbar-dark bg-green">
+<footer class="navbar navbar-expand-lg navbar-dark bg-primary">
   <div class="container">
     <ul class="nav">
       <li class="nav-item">
-        <%= link_to "利用規約", top_rulu_path, class: "nav-link active" %>
+        <%= link_to "利用規約・プライバシーポリシー", top_rulu_path, class: "nav-link active text-secondary" %>
       </li>
       <li class="nav-item">
-        <%= link_to "FAQ", top_faq_path, class: "nav-link active" %>
+        <%= link_to "カウカウOnlineについて", top_links_path, class: "nav-link active text-secondary" %>
       </li>
       <li class="nav-item">
-       <%= link_to "お問い合わせ", top_contact_path, class: "nav-link active" %>
+        <%= link_to "FAQ", top_howto_path, class: "nav-link active text-secondary" %>
+      </li>
+      <li class="nav-item">
+       <%= link_to "お問い合わせ", top_contact_path, class: "nav-link active text-secondary" %>
       </li>
     </ul>
   </div>

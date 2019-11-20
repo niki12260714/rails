@@ -79,7 +79,16 @@
         <% @items.each do |item| %>
           <tr>
             <td><%= check_box_tag 'item[]', item.id, false, {class: "items"} %></td>
-            <td><%= item.item_name %></td>
+            <td>
+              <% if item.item_label != "none" %><i class="fas fa-tag <%= item.item_label %>"></i><% end %>
+              <% if item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+              <%= item.item_name %>
+              <% if item.item_url.to_s.size > 0 %>
+                <%= link_to item.item_url, target: "_blank" do %>
+                  <i class="fas fa-home"></i>
+                <% end %>
+              <% end %>
+            </td>
             <td class="d-none d-sm-table-cell"><%= item.circle_name%></td>
             <td class="d-none d-sm-table-cell"><%= item.item_memo %></td>
             <td>
@@ -87,7 +96,7 @@
                 <%= link_to items_edit_path + '/' + item.id.to_s, class:"btn btn-primary btn-sm" do %>
                   <i class="fas fa-edit"></i> 編集
                 <% end %>
-                <%= link_to items_delete_path + '/' + item.id.to_s, data: { confirm: 'アイテムを削除しますか？' }, class:"btn btn-danger" do %>
+                <%= link_to items_delete_path + '/' + item.id.to_s, data: { confirm: 'アイテムを削除しますか？' }, class:"btn btn-outline-dark btn-sm" do %>
                   <i class="fas fa-trash-alt"></i> 削除
                 <% end %>
               </div>

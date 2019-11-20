@@ -1,10 +1,10 @@
 <div class="modal-dialog" style="z-index: 1500">
   <div class="modal-content">
       <div class="modal-header">
+        <h4 class="modal-title">【<%= @purchase.item.item_name %>】割当</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
-        <h4 class="modal-title">【<%= @purchase.item.item_name %>】割当</h4>
       </div>
       <%= form_tag({controller: :history, action: :do_adjustment}, remote: true, id: :fs)do %>
         <div class="modal-body">

@@ -1,5 +1,5 @@
 <% if request.path == "/groups/new"  %>
-  ※メンバーの設定はグループ作成後に行えます
+  ※メンバーの設定はイベント計画作成後に行えます
 <% else %>
   <% if @group_member.empty? %>
     メンバーは存在しません。
@@ -12,7 +12,11 @@
             <tr>
               <th>
                 <% if member.user_id != current_user.id %>
-                  <%= check_box_tag 'member[]', member.user_id, false, {} %>
+                  <% if request.path == "/groups/copy" %>
+                    <%= check_box_tag 'member[]', member.user_id, true, {form: :copy_form} %>
+                  <% else %>
+                    <%= check_box_tag 'member[]', member.user_id, false, {form: :fm} %>
+                  <% end %>
                 <% end %>
               </th>
               <% if member.provider == "twitter" then display_id = member.twitter_acount else display_id = member.system_id end %>
@@ -26,7 +30,7 @@
         </tbody>
       </table>
       <%= hidden_field_tag :id, @group.id %>
-      <% if @group_member.size > 1 %>
+      <% if @group_member.size > 1 && request.path != "/groups/copy" %>
         <%= button_tag( class: "btn btn-danger btn-icon") do %>
           <span class="btn-inner--icon"><i class="fas fa-user-times"></i></span>
           <span class="btn-inner--text">メンバー削除</span>

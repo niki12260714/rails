@@ -29,6 +29,9 @@ class TopController < ApplicationController
   def rule
   end
   
+  def links
+  end
+  
   def invitation
     #招待されたグループ情報を取得
     @group = Group.find_by(id: params[:g_id])

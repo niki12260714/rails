@@ -1,0 +1,9 @@
+<br />
+<%= link_to "#{history_circle_list_path}/#{@group.id}.csv", class: "btn btn-outline-info" do %>
+  <i class="fas fa-download"></i>一括登録用CSV出力
+<% end %>  
+<% if !@u_id.nil? %>
+  <%= link_to "#{history_result_list_path}/#{@group.id}/#{@u_id}.csv", class: "btn btn-outline-info" do %>
+    <i class="fas fa-download"></i>購入結果CSV出力
+  <% end %>
+<% end %> 

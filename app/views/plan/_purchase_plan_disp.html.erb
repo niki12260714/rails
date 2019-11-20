@@ -1,10 +1,11 @@
 <div class="modal-dialog">
   <div class="modal-content">
       <div class="modal-header">
+        <% if @purchase.item.item_label != "none" %><i class="fas fa-tag <%= @purchase.item.item_label %>"></i><% end %>
+        <h4 class="modal-title">【<%= @purchase.item.item_name %>】計画</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
-        <h4 class="modal-title">【<%= @purchase.item.item_name %>】計画</h4>
       </div>
       <div class="modal-body">
           本の名前：
@@ -20,7 +21,13 @@
           購入担当：
           <% if @purchase.purchase_user_id.nil? %>未設定<% else %><%= @purchase.user.nickname %><% end %><br/>
           優先度：
-          <% if @purchase.priority.nil? %>未設定<% elsif @purchase.priority.to_i == 1 %>最優先<% else %><%= @purchase.priority.to_s %>番目<% end %><br/>
+          <% if @purchase.priority.to_s == "" %>未設定<% elsif @purchase.priority.to_i == 1 %>最優先<% else %><%= @purchase.priority.to_s %>番目<% end %><br/>
+          参考URL：
+          <% if @purchase.item.item_url.to_s.size > 0 %>
+            <%= link_to @purchase.item.item_url, @purchase.item.item_url, target: "_blank" %>
+          <% else %>
+            設定無し
+          <% end %><br/>
           購入希望<br />
           <% @purchase.purchase_members.each do |pm| %>
             <%= pm.user.nickname %>×<%= pm.want_count.to_s %>冊<br/>

@@ -35,5 +35,9 @@ class Group < ApplicationRecord
   scope :get_future_group, ->{
     where("end_flg = false and date(CONVERT_TZ(purchase_day,'UTC','Asia/Tokyo')) >= ?", Date.today)
   }
-
+  
+  #引数のID
+  scope :get_group_by_id, ->(gid){
+    where(id: gid)
+  }
 end

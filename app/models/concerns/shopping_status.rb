@@ -1,6 +1,6 @@
 class ShoppingStatus
   include ActiveModel::Model
-  attr_accessor :price, :p_count, :max_count, :item_name, :novelty_flg
+  attr_accessor :price, :p_count, :max_count, :item_name, :novelty_flg, :item_purchase_status
   
   validates :price,
     presence: true,

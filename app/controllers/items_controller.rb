@@ -45,6 +45,14 @@ class ItemsController < ApplicationController
   def new
     #空のitemモデルを作る
     @item = PersonalItem.new(mode: "new", item_id: nil, want_count: 1)
+    if session[:item_continue]
+      session.delete(:item_continue)
+      #サークル情報を引き継ぐ指定で来たら、値を設定する
+      if session[:circle_name]
+        @item.circle_name = session[:circle_name]
+        session.delete(:circle_name)
+      end
+    end
   end
   
   def edit
@@ -52,13 +60,18 @@ class ItemsController < ApplicationController
     item = Item.find_by(id: params[:id])
     pm = PurchaseMember.find_by(item_id: params[:id], group_id: nil)
     #取得情報をitemモデルに入れる
-    @item = PersonalItem.new(mode: "edit", item_id: item.id, item_name:item.item_name, circle_name: item.circle_name, price: item.price, novelty_flg: item.novelty_flg, item_memo:item.item_memo, want_count: pm.want_count)
+    @item = PersonalItem.new(mode: "edit", item_id: item.id, item_name:item.item_name, circle_name: item.circle_name, price: item.price, novelty_flg: item.novelty_flg, item_memo:item.item_memo, \
+                            item_label: item.item_label, item_url: item.item_url, want_count: pm.want_count)
   end
   
   def save_data
     #ノベルティに選択が無ければ、不明とする
     if params[:personal_item][:novelty_flg].nil? then n_flg = 0 else n_flg = params[:personal_item][:novelty_flg] end
-    chk_model = PersonalItem.new(item_name: params[:personal_item][:item_name], circle_name: params[:personal_item][:circle_name], price: params[:personal_item][:price], item_memo: params[:personal_item][:item_memo], want_count: params[:personal_item][:want_count])
+    #ラベルに選択が無ければ、無しとする
+    if params[:personal_item][:item_label].nil? then p_item_label = "none" else p_item_label = params[:personal_item][:item_label] end
+    #入力チェック
+    chk_model = PersonalItem.new(item_name: params[:personal_item][:item_name], circle_name: params[:personal_item][:circle_name], price: params[:personal_item][:price], item_memo: params[:personal_item][:item_memo], \
+                                item_label: p_item_label, item_url: params[:personal_item][:item_url], want_count: params[:personal_item][:want_count])
     if !chk_model.valid?
       @errors = chk_model.errors
       return
@@ -68,7 +81,8 @@ class ItemsController < ApplicationController
       #新規作成と更新で処理分岐
       if params[:personal_item][:mode] == "new"
         #入力値を元にモデルオブジェクトを生成
-        item = Item.new(item_name: params[:personal_item][:item_name], circle_name: params[:personal_item][:circle_name], price: params[:personal_item][:price], item_memo: params[:personal_item][:item_memo], novelty_flg: n_flg.to_i)
+        item = Item.new(item_name: params[:personal_item][:item_name], circle_name: params[:personal_item][:circle_name], price: params[:personal_item][:price], item_memo: params[:personal_item][:item_memo], \
+                        item_label: p_item_label, item_url: params[:personal_item][:item_url], novelty_flg: n_flg.to_i)
         #中間テーブルの購入メンバーを生成
         item.purchase_members.build(group_id: nil,user_id: current_user.id, want_count: params[:personal_item][:want_count])
         #アイテムをDBに保存
@@ -85,6 +99,8 @@ class ItemsController < ApplicationController
         item.circle_name = params[:personal_item][:circle_name]
         item.price = params[:personal_item][:price]
         item.item_memo = params[:personal_item][:item_memo]
+        item.item_label = p_item_label
+        item.item_url = params[:personal_item][:item_url]
         item.novelty_flg = n_flg.to_i
         #PurchaseMemberモデルを呼び出し、パラメータで上書き
         pm = PurchaseMember.find_by(item_id: params[:personal_item][:item_id], group_id: nil, user_id: current_user.id)
@@ -94,8 +110,18 @@ class ItemsController < ApplicationController
         pm.save!
       end
     end
-    #トランザクション終了後に個人メモ画面に戻る
-    redirect_to items_list_path
+    #トランザクション終了後、続行フラグを見て、アイテム一覧に戻るかまた新規作成をするかに分岐
+    if params[:personal_item][:cotinue_flg]
+      session[:item_continue] = true
+      if params[:personal_item][:cotinue_circle_flg]
+        #サークル情報を引き継ぐ場合、セッションに情報を保存
+        session[:circle_name] = params[:personal_item][:circle_name]
+      end
+      redirect_to items_new_path
+    else
+      redirect_to items_list_path
+    end
+    
     #以下トランザクションで失敗した時の挙動記述
     rescue => e
       flash[:danger] = e.message
@@ -140,7 +166,7 @@ class ItemsController < ApplicationController
       
       #中間テーブルの更新と作成
       params[:item].each do |i_id|
-        purchase = Purchase.new(group_id: g_id, item_id: i_id, item_purchase_status: 0)
+        purchase = Purchase.new(group_id: g_id, item_id: i_id, item_purchase_status: 0, purchase_user_id: current_user.id)
         purchase.save!
         purchase_member = PurchaseMember.find_by(item_id: i_id, user_id: current_user.id, group_id: nil)
         purchase_member.group_id = g_id

@@ -1,6 +1,27 @@
 <%= render 'layouts/message' %>
-<%= link_to new_group_path, class:"btn btn-primary" do %>
-  <i class="fas fa-plus"></i> 新規作成
+<% if @copy_list.size > 0 %>
+  <%= form_tag( {controller: :groups, action: :copy}, id: :fm, class: "form_group")do %>
+    <div class="row">
+      <div class="col-lg-4">
+        <%= collection_select(:group_id, :id, @copy_list, :id, :group_name,{}, {class: 'form-control'}) %>
+      </div>
+      <div class="col-lg-4">
+        <%= button_tag( class: "btn btn-outline-primary btn-icon") do %>
+          <span class="btn-inner--icon"><i class="fas fa-copy"></i></span>
+          <span class="btn-inner--text">イベント計画を複製</span>
+        <% end %>
+      </div>
+      <div class="col-lg-4">
+        <%= link_to new_group_path, class:"btn btn-primary" do %>
+          <i class="fas fa-plus"></i> 新規作成
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+<% else %>
+  <%= link_to new_group_path, class:"btn btn-primary" do %>
+    <i class="fas fa-plus"></i> 新規作成
+  <% end %>
 <% end %>
 <br />
 <br />
@@ -31,22 +52,27 @@
       </div>
       <div class="card-footer">
         <% if group.create_user_id == current_user.id %>
-          <%= link_to edit_group_path(group), class:"btn btn-primary" do %>
-            <i class="fas fa-edit"></i> 編集
-          <% end %>
-          <%= link_to groups_invitation_path + '/' + group.id.to_s, remote: true, class:"btn btn-secondary" do %>
-            <i class="fas fa-user-plus"></i> 招待
-          <% end %>
-          <%= link_to group, method: :delete, data: { confirm: 'イベント計画を削除しますか？' }, class:"btn btn-danger" do %>
-            <i class="fas fa-trash-alt"></i> 削除
-          <% end %>
+          <div class="btn-group">
+            <%= link_to edit_group_path(group), class:"btn btn-primary" do %>
+              <i class="fas fa-edit"></i> 編集
+            <% end %>
+            <%= link_to groups_invitation_path + '/' + group.id.to_s, remote: true, class:"btn btn-outline-dark" do %>
+              <i class="fas fa-user-plus"></i> 招待
+            <% end %>
+            <%= link_to group, method: :delete, data: { confirm: 'イベント計画を削除しますか？' }, class:"btn btn-outline-primary" do %>
+              <i class="fas fa-trash-alt"></i> 削除
+            <% end %>
+          </div>
         <% else %>
-          <%= link_to groups_leave_path + '/' + group.id.to_s, data: { confirm: 'イベント計画から退会しますか？' }, class:"btn btn-danger" do %>
+          <%= link_to groups_leave_path + '/' + group.id.to_s, data: { confirm: 'イベント計画から退会しますか？' }, class:"btn btn-outline-primary" do %>
             <i class="fas fa-user-times"></i> 退会
           <% end %>
         <% end %>
         <%= link_to groups_checkpay_path + '/' + group.id.to_s, class:"btn btn-primary" do %>
           <i class="fas fa-dollar-sign"></i> 精算予定
+        <% end %>
+        <%= link_to "#{groups_preview_path}/#{group.id.to_s}", class:"btn btn-primary" do %>
+          <i class="fas fa-check"></i> 当日プレビュー
         <% end %>
       </div>
     </div>

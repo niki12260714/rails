@@ -1,0 +1,22 @@
+<div class="row">
+  <div class="col-lg-8">
+    <%= render 'form' %>
+  </div>
+  <div class="col-lg-4">
+    <%= render 'member' %>
+  </div>
+</div>
+<small>
+  ・前回のイベント計画の内容と、登録アイテムを引き継いで、新しくイベント計画を作成します。<br />
+  ・共同購入メンバーは自動的に参加となります。招待を送らない人はチェックを外してください。<br />
+  ・登録アイテムは、サークル名、購入担当、購入希望が引き継がれます。アイテム名は一律「新刊」となります。<br />
+</small>
+<%= form_with(url: groups_save_copy_data_path, method: :post, local: true, autocomplete: :off, id: "copy_form") do |form| %>
+  <%= hidden_field_tag :copy_id, params[:group_id][:id] %>
+  <div class="actions">
+    <%= button_tag( class: "btn btn-primary btn-icon", onclick: "post_form()") do %>
+      <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+      <span class="btn-inner--text">複製</span>
+    <% end %>
+  </div>
+<% end %>

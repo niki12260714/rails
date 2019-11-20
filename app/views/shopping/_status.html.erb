@@ -1,10 +1,10 @@
 <div class="modal-dialog">
   <div class="modal-content">
       <div class="modal-header">
+        <h4 class="modal-title">【<%= @ss.item_name %>】購入状況</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
-        <h4 class="modal-title">【<%= @ss.item_name %>】購入状況</h4>
       </div>
       <%= form_for @ss, url:{controller: :shopping, action: :save_status}, html: {autocomplete: 'off'}, data: {remote: true} do |form| %>
         <div class="modal-body">
@@ -12,7 +12,8 @@
           <%= form.label :price %>
           <%= form.number_field :price, id: :price, min: 0 %><br/>
           <%= form.label :p_count %>
-          <%= form.number_field :p_count, id: :price, min: 1 %><br/>
+          <%= form.number_field :p_count, id: :price, min: 0 %><br/>
+          <% if @ss.item_purchase_status.to_i != 0 %><small class="text-warning">(参考)<%= form.label :max_count %>：<%= @ss.max_count %></small><br /><% end %>
           <%= form.label :novelty_flg %>
           <%= form.radio_button :novelty_flg, 2 %>無 <%= form.radio_button :novelty_flg, 1 %>有<br />
           <%= form.hidden_field :max_count %>

@@ -7,15 +7,15 @@
     </tr>
   </thead>
   <tbody>
-    <% if @other_user_list.size != 0 %>
+    <% if !@other_user_list.nil? && @other_user_list.size != 0 %>
       <% @other_user_list.each do |list| %>
         <tr>
           <td class="text-nowrap align-top">
-            <span class="font-weight-700 ">【<%= @targe_user.nickname %>→<%= list.target_user %>】</span>：<span class="text-warning"><%= list.pass_item_price.to_s %>円</span><br />
+            <span class="font-weight-700 ">【<%= @targe_user.nickname %>→<%= list.target_user %>】</span>：<span class="text-warning"><%= "#{list.pass_item_price.to_s}円(#{list.pass_sum.to_s}冊)" %></span><br />
             <% if list.pass_item.size != 0 %>
               <% list.pass_item.each do |pitem| %>
                 <% if pitem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
-                <%= pitem.item_name %>（<%= pitem.price %>円）×<%= pitem.count %>冊<br />
+                <%= link_to pitem.item_name, "#{plan_display_path}/#{pitem.p_id.to_s}", remote: true %>（<%= pitem.price %>円）×<%= pitem.count %>冊<br />
               <% end %>
             <% else %>
               無し<br />
@@ -24,25 +24,25 @@
               <br /><span class="font-weight-700 ">【購入できなかった本】</span><br />
               <% list.pass_bad_item.each do |pbitem| %>
                 <% if pbitem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
-                <%= pbitem.item_name %><br />
+                <%= link_to pbitem.item_name, "#{plan_display_path}/#{pbitem.p_id.to_s}", remote: true %><br />
               <% end %>
             <% end %>
           </td>
           <td class="text-nowrap align-top">
-            <span class="font-weight-700 ">【<%= list.target_user %>→<%= @targe_user.nickname %>】</span>：<span class="text-warning"><%= list.receive_item_price.to_s %>円</span><br />
+            <span class="font-weight-700 ">【<%= list.target_user %>→<%= @targe_user.nickname %>】</span>：<span class="text-warning"><%= "#{list.receive_item_price.to_s}円(#{list.receive_sum}冊)" %></span><br />
             <% if list.receive_item.size != 0 %>
               <% list.receive_item.each do |ritem| %>
                 <% if ritem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
-                <%= ritem.item_name %>（<%= ritem.price %>円）×<%= ritem.count %>冊<br />
+                <%= link_to ritem.item_name, "#{plan_display_path}/#{ritem.p_id.to_s}", remote: true %>（<%= ritem.price %>円）×<%= ritem.count %>冊<br />
               <% end %>
             <% else %>
               無し<br />
             <% end %>
             <% if list.receive_bad_item.size != 0 %>
-              <br /><span class="font-weight-700 ">【購入できなかった本】】</span><br />
+              <br /><span class="font-weight-700 ">【購入できなかった本】</span><br />
               <% list.receive_bad_item.each do |rbitem| %>
                 <% if rbitem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
-                <%= rbitem.item_name %><br />
+                <%= link_to rbitem.item_name, "#{plan_display_path}/#{rbitem.p_id.to_s}", remote: true %><br />
               <% end %>
             <% end %>
           </td>
@@ -61,18 +61,18 @@
     <% end %>
     <tr>
       <td class="text-nowrap">
-        <span class="font-weight-700 ">【<%= @targe_user.nickname %>個人用】</span>：<span class="text-warning"><%= @own_list.pass_item_price.to_s %>円</span><br />
+        <span class="font-weight-700 ">【<%= @targe_user.nickname %>個人用】</span>：<span class="text-warning"><%= "#{@own_list.pass_item_price.to_s}円(#{@own_list.pass_sum}冊)" %></span><br />
         <% if @own_list.pass_item.size != 0 %>
           <% @own_list.pass_item.each do |oitem| %>
             <% if oitem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
-            <%= oitem.item_name %>（<%= oitem.price %>円）×<%= oitem.count %>冊<br />
+            <%= link_to oitem.item_name, "#{plan_display_path}/#{oitem.p_id.to_s}", remote: true %>（<%= oitem.price %>円）×<%= oitem.count %>冊<br />
           <% end %>
         <% end %>
         <% if @own_list.pass_bad_item.size != 0 %>
           <br /><span class="font-weight-700 ">【購入できなかった本】</span><br />
           <% @own_list.pass_bad_item.each do |pbitem| %>
             <% if pbitem.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
-            <%= pbitem.item_name %><br />
+            <%= link_to pbitem.item_name, "#{plan_display_path}/#{pbitem.p_id.to_s}", remote: true %><br />
           <% end %>
         <% end %>
       </td>
@@ -81,3 +81,4 @@
     </tr>
   </tbody>
 </table>
+<div id="plan-display-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>

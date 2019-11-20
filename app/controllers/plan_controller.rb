@@ -3,7 +3,7 @@ class PlanController < ApplicationController
   before_action :authenticate_user!
   before_action :authenticate_group_member, only: [:index, :new, :edit]
   before_action :set_group, only: [:index, :new, :edit, :list]
-  before_action :set_pre_path, only: [:new, :edit]
+  before_action :set_pre_path, only: [:edit]
   before_action :set_priority_list, only: [:new, :edit]
   before_action :set_seach_list, only:[:index]
   include Log, Buy, Withdrawal
@@ -52,23 +52,23 @@ class PlanController < ApplicationController
               preload(:user).preload(:item).preload(purchase_members: :user).order(str_sort).distinct
     end
     #金額を算出（上からグループ計、購入担当計、購入希望計）
-    g_price = PurchaseMember.where(group_id: params[:id]).joins(:item).where("items.price", 1..Float::INFINITY).group("purchase_members.item_id").select("MAX(items.price) * SUM(purchase_members.want_count) price")
+    g_price = PurchaseMember.where(group_id: params[:id]).joins(:purchase).joins(:item).where("items.price > 0 and purchases.item_purchase_status = ?", 0).group("purchase_members.item_id").select("MAX(items.price) * SUM(purchase_members.want_count) price")
     @all_price = 0
-    if g_price.size != 0
+    if g_price.length != 0
       g_price.each do |gp|
         @all_price += gp.price.to_i
       end
     end
-    g_own_price = Purchase.where(group_id: params[:id], purchase_user_id: current_user.id).joins(:item).where("items.price", 1..Float::INFINITY).joins(:purchase_members).group("purchase_members.item_id").select("MAX(items.price) * SUM(purchase_members.want_count) price")
+    g_own_price = Purchase.where(group_id: params[:id], purchase_user_id: current_user.id).joins(:item).where("items.price > 0 and purchases.item_purchase_status = ?", 0).joins(:purchase_members).group("purchase_members.item_id").select("MAX(items.price) * SUM(purchase_members.want_count) price")
     @own_price = 0
-    if g_own_price.size != 0
+    if g_own_price.length != 0
       g_own_price.each do |go|
         @own_price += go.price.to_i
       end
     end
-    g_want_price = Purchase.where(group_id: params[:id]).joins(:purchase_members).joins(:item).where("items.price", 1..Float::INFINITY).where("purchase_members.user_id = ?", current_user.id.to_i).group("purchase_members.item_id").select("MAX(items.price) * SUM(purchase_members.want_count) price")
+    g_want_price = Purchase.where(group_id: params[:id]).joins(:purchase_members).joins(:item).where("items.price > 0 and purchases.item_purchase_status = ?", 0).where("purchase_members.user_id = ?", current_user.id.to_i).group("purchase_members.item_id").select("MAX(items.price) * SUM(purchase_members.want_count) price")
     @want_price = 0
-    if g_want_price.size != 0
+    if g_want_price.length != 0
       g_want_price.each do |gw|
         @want_price += gw.price.to_i
       end
@@ -84,8 +84,25 @@ class PlanController < ApplicationController
   def new
     #グループメンバーを取得（購入数欄表示の為）
     get_member_data(0, params[:id])
-    #空のplanモデルを作る
-    @plan = Plan.new(group_id: params[:id], mode: "new", cr: @cr, ac: @ac, item_id: nil)
+    #空のplanモデルを作る※購入担当をログインユーザーに指定する
+    @plan = Plan.new(group_id: params[:id], mode: "new", cr: @cr, ac: @ac, item_id: nil, purchase_user_id: current_user.id)
+    #引き続き入力なのかを判定、判定が終わればセッションを破棄
+    if session[:item_continue]
+      session.delete(:item_continue)
+      #サークル情報を引き継ぐ指定で来たら、値を設定する
+      if session[:circle_name]
+        @plan.circle_name = session[:circle_name]
+        @plan.block_number = session[:block_number]
+        @plan.space_number = session[:space_number]
+        #サークル名、ブロック番号、配置番号のセッションを破棄
+        session.delete(:circle_name)
+        session.delete(:block_number)
+        session.delete(:space_number)
+      end
+    else
+      #引継ぎ情報がない新規作成は、前画面のURLをセッションに保持する
+      set_pre_path
+    end
     #キャンセルボタン押下時の戻り先のパスを指定
     if @cr == "plan" then @rtn_path = plan_path + '/' + params[:id] else @rtn_path = shopping_group_path + '/' + params[:id] end
   end
@@ -98,7 +115,8 @@ class PlanController < ApplicationController
     purchase = Purchase.find_by(item_id: params[:item_id], group_id: params[:id])
     #planモデルに値を詰める
     @plan = Plan.new(group_id: params[:id], mode: "edit", cr: @cr, ac: @ac, item_id: item.id, item_name: item.item_name, circle_name: item.circle_name, \
-            space_number: purchase.space_number, block_number: purchase.block_number, price: item.price, novelty_flg: item.novelty_flg, item_memo: item.item_memo, purchase_user_id: purchase.purchase_user_id, priority: purchase.priority)
+            space_number: purchase.space_number, block_number: purchase.block_number, price: item.price, novelty_flg: item.novelty_flg, \
+            item_label: item.item_label, item_url: item.item_url, item_memo: item.item_memo, purchase_user_id: purchase.purchase_user_id, priority: purchase.priority)
     #キャンセルボタン押下時の戻り先のパスを指定
     if @cr == "plan" then @rtn_path = plan_path + '/' + params[:id] else @rtn_path = shopping_group_path end
   end
@@ -144,9 +162,11 @@ class PlanController < ApplicationController
     Item.transaction do
       #ノベルティが選択されていなければ、強制的に不明(0)に変換
       if params[:plan][:novelty_flg].nil? then n_flg = 0 else n_flg = params[:plan][:novelty_flg] end
+      #ラベルに選択が無ければ、無しとする
+      if params[:plan][:item_label].nil? then p_item_label = "none" else p_item_label = params[:plan][:item_label] end
       
       #ブロック番号の調整。全角A-zを半角変換
-      if !params[:plan][:block_number].nil? and params[:plan][:block_number] != ""
+      if params[:plan][:block_number].to_s != ""
         params[:plan][:block_number] = params[:plan][:block_number].to_s.tr('ａ-ｚＡ-Ｚ','a-zA-Z')
       end
       
@@ -154,7 +174,8 @@ class PlanController < ApplicationController
       if params[:plan][:mode] == "new"
         #Itemモデルを作成する
         item = Item.new(item_name: params[:plan][:item_name], circle_name: params[:plan][:circle_name],\
-                        price: params[:plan][:price].to_i, item_memo: params[:plan][:item_memo], novelty_flg: n_flg)
+                        price: params[:plan][:price].to_i, item_memo: params[:plan][:item_memo], \
+                        item_label: p_item_label, item_url: params[:plan][:item_url], novelty_flg: n_flg)
         #Purchaseモデルをitemに紐づけて作成する
         p = item.purchases.build(group_id: params[:plan][:group_id], space_number: params[:plan][:space_number], block_number: params[:plan][:block_number], \
                                purchase_user_id: params[:plan][:purchase_user_id], priority: params[:plan][:priority])
@@ -182,6 +203,8 @@ class PlanController < ApplicationController
         item.circle_name = params[:plan][:circle_name]
         item.price = params[:plan][:price].to_i
         item.item_memo = params[:plan][:item_memo]
+        item.item_label = p_item_label
+        item.item_url = params[:plan][:item_url]
         item.novelty_flg = n_flg
         item.save!
         #Purchaseモデルを呼び出し、パラメーターで上書き
@@ -215,7 +238,20 @@ class PlanController < ApplicationController
         flash[:success] = "アイテムの計画を変更しました"
       end
     end
-    redirect_to session[:request_from]
+    #続けて入力するかを判定、セッションにフラグを入れておく
+    if params[:plan][:cotinue_flg]
+      session[:item_continue] = true
+      if params[:plan][:cotinue_circle_flg]
+        #サークル名、ブロック番号、配置番号をセッションに保存
+        session[:circle_name] = params[:plan][:circle_name]
+        session[:block_number] = params[:plan][:block_number]
+        session[:space_number] = params[:plan][:space_number]
+      end
+      redirect_to "#{plan_new_path}/#{params[:plan][:group_id]}"
+    else
+      redirect_to session[:request_from]
+    end
+    
     #以下トランザクションで失敗した時の挙動記述
     rescue => e
       flash[:danger] = e.message
@@ -326,6 +362,36 @@ class PlanController < ApplicationController
         headers['Content-Disposition'] = "attachment; filename=\"#{filename}.csv\""
       end
     end
+  end
+  
+  def csv_upload
+    #CSVアップロード
+    if params[:file_up].nil?
+      flash[:danger] = "登録するCSVファイルを選択してください。"
+      redirect_to "#{plan_path}/#{params[:group_id]}"
+      return
+    end
+    Item.transaction do
+      CSV.foreach(params[:file_up].path, headers: true, encoding: "UTF-8") do |data|
+        #Active Modelに一旦詰めてエラーチェック、エラーがあれば飛ばす
+        if data[0] then iname = data[0] else iname = "新刊" end
+        chk_model = Plan.new(item_name: iname, circle_name: data[1], block_number: data[2], space_number: data[3])
+        next if !chk_model.valid?
+        
+        item = Item.new(item_name: iname, circle_name: data[1])
+        p = item.purchases.build(group_id: params[:group_id], block_number: data[2], space_number: data[3], purchase_user_id: current_user.id)
+        #一旦、itemを保存する
+        item.save!
+        pm = PurchaseMember.new(user_id: current_user.id, group_id: params[:group_id], item_id: item.id, purchase_id: p.id, want_count: 1)
+        pm.save!
+      end
+    end
+    flash[:success] = "一括登録処理を終了しました。エラーになったデータは無視されます。"
+    redirect_to "#{plan_path}/#{params[:group_id]}"
+    #以下トランザクションで失敗した時の挙動記述
+    rescue => e
+      flash[:danger] = e.message
+      redirect_to "#{plan_path}/#{params[:group_id]}"
   end
   
   private

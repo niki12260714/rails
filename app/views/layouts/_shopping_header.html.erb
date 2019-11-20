@@ -1,19 +1,42 @@
+<%
+  if @mode.nil? and params[:mode].nil?
+    mode = :today
+    item_path = shopping_own_path
+    circle_path = shopping_circle_view_path
+    correction_path = shopping_correction_path
+  else
+    mode = :preview
+    item_path = "#{shopping_own_path}?mode=preview&id=#{params[:id]}"
+    circle_path = "#{shopping_circle_view_path}?mode=preview&id=#{params[:id]}"
+    correction_path = "#{shopping_correction_path}?mode=preview&id=#{params[:id]}"
+  end
+%>
 <nav class="navbar navbar-expand-lg navbar-light bg-secondary">
   <div class="container">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
-        <%= link_to shopping_own_path, class: "nav-link" do %>
-          <i class="fas fa-user"></i>購入担当
+        <%= link_to item_path, class: "nav-link" do %>
+          <i class="fas fa-shopping-cart"></i>購入担当：アイテム別
         <% end %>
       </li>
-      <% if @groups.length > 0 %>
+      <li class="nav-item active">
+        <%= link_to circle_path, class: "nav-link" do %>
+          <i class="fas fa-shopping-cart"></i>購入担当：サークル別
+        <% end %>
+      </li>
+      <li class="nav-item active">
+        <%= link_to correction_path, class: "nav-link" do %>
+          <i class="fas fa-shopping-cart"></i>購入担当：購入済み
+        <% end %>
+      </li>
+      <% if @groups.length > 0 && mode == :today %>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbar_1_dropdown_1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-check"></i>状況確認
           </a>
           <div class="dropdown-menu" aria-labelledby="navbar_1_dropdown_1">
             <% @groups.each do |g| %>
-              <%= link_to g.group_name, shopping_group_path + "/" + g.id.to_s, class: "dropdown-item" %>
+              <%= link_to g.group_name, "#{shopping_group_path}/#{g.id.to_s}", class: "dropdown-item" %>
             <% end %>
           </div>
         </li>
@@ -23,7 +46,7 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="navbar_1_dropdown_1">
             <% @groups.each do |g| %>
-              <%= link_to g.group_name, shopping_result_path + "/" + g.id.to_s, class: "dropdown-item" %>
+              <%= link_to g.group_name, "#{shopping_result_path}/#{g.id.to_s}", class: "dropdown-item" %>
             <% end %>
           </div>
         </li>

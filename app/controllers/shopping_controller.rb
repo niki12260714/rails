@@ -3,18 +3,55 @@ class ShoppingController < ApplicationController
   before_action :authenticate_user!
   before_action :check_groups
   before_action :get_group_overview, only: [:group, :result]
+  before_action :set_seach_list, only:[:correction]
   include Buy, Withdrawal
   
   def own
-    own_shopping_item(current_user.id, params[:page], params[:colum], params[:sort])
+    #自分の買い物（アイテム順）
+    if params[:mode].nil?
+      #プレビューモードではない場合
+      own_shopping_item(current_user.id, params[:page], params[:colum], params[:sort])
+    else
+      own_shopping_item_preview(current_user.id, params[:page], params[:colum], params[:sort], params[:id])
+    end
     @rtn = "own"
+  end
+  
+  def circle_view
+    #自分の買い物（サークル順一覧）
+    own_shopping_item_by_block(current_user.id, params[:block_no], params[:mode], params[:id])
+  end
+  
+  def circle_view_detail
+    #自分の買い物（サークル詳細)
+    #postで渡ってきた時は、postで渡された値をセッションに詰めておく
+    if request.post? 
+      session[:circle_info] = {item_ids: params[:item_ids], join_circle_number: params[:join_circle_number], \
+                              circle_name_first: params[:circle_name_first], display_block_no: params[:display_block_no] }
+    end
+    session[:circle_info].symbolize_keys!
+    own_shopping_circle_detail(current_user.id, session[:circle_info][:item_ids].to_s)
+  end
+  
+  def correction
+    #自分の買い物で購入済みを取得
+    if params[:search].nil? then @search = 0 else @search = params[:search] end
+    own_shopping_end_item(current_user.id, @search)
+  end
+  
+  def search_correction
+    #自分自身にリダイレクト
+    r_path = "#{shopping_correction_path}/#{params[:search].to_s}"
+    redirect_to r_path
   end
   
   def status
     #ステータス変更対象データ取得
-    p = Purchase.joins(:item).select("items.price, items.item_name, items.novelty_flg as nv").find_by(id: params[:p_id])
+    p = Purchase.joins(:item).select("items.price, items.item_name, items.novelty_flg as nv, purchases.item_purchase_status, purchases.purchase_count").find_by(id: params[:p_id])
     #ShoppingStatusモデルを組み立てる
-    @ss = ShoppingStatus.new(item_name: p.item_name, price: p.price, p_count: params[:count], max_count: params[:count], novelty_flg: p.nv)
+    # 購入ステータスが未購入の時はparamus[:count]、購入済みの場合はpurchase_countが実数(p_count)になる
+    if p.item_purchase_status.to_i != 0 then p_cnt = p.purchase_count else p_cnt = params[:count] end
+    @ss = ShoppingStatus.new(item_name: p.item_name, price: p.price, p_count: p_cnt, max_count: params[:count], novelty_flg: p.nv, item_purchase_status: p.item_purchase_status)
   end
   
   def save_status
@@ -25,8 +62,10 @@ class ShoppingController < ApplicationController
       return
     end
 
-    #購入できていた場合、完全購入か一部購入かでステータスを判定
-    if params[:shopping_status][:max_count].to_i > params[:shopping_status][:p_count].to_i
+    #購入数によりステータスを切り分け
+    if params[:shopping_status][:p_count].to_i == 0
+      st = 2
+    elsif params[:shopping_status][:max_count].to_i > params[:shopping_status][:p_count].to_i
       st = 3
     else
       st = 1
@@ -76,6 +115,8 @@ class ShoppingController < ApplicationController
       rtn_path = shopping_own_path
     elsif params[:rtn] == "shopping_end"
       rtn_path = shopping_result_path + "/" + params[:g_id]
+    elsif params[:rtn] == "circle_view"
+      rtn_path = shopping_circle_view_detail_path
     end
     if rtn_path != "" 
       redirect_to rtn_path
@@ -133,7 +174,7 @@ class ShoppingController < ApplicationController
       pa = Purchase.where(group: params[:group_id].to_i, item_purchase_status: 2).joins(:purchase_members).joins(:item).preload(:item).preload(:purchase_members).distinct
       pa.each do |p|
         p.purchase_members.each do |pm|
-          create_new_personal_item(pm.item_id, pm.user_id, pm.group_id)
+          create_new_personal_item(pm.item_id, pm.user_id, pm.group_id) if pm.want_count > 0
         end
       end
       #グループの締めフラグを立てる
@@ -151,6 +192,9 @@ class ShoppingController < ApplicationController
       #履歴からの締めの場合、次の画面の為に一部購入一覧とグループ概要を取得
       get_part_items(params[:group_id])
       get_group_overview_by_id(params[:group_id])
+      if @purchase.length == 0
+        get_result_items(session["history_group"], session["history_member"], 1)
+      end
       @group_chk = Group.find_by(id: params[:group_id])
     end
     #以下トランザクションで失敗した時の挙動記述
@@ -218,6 +262,11 @@ class ShoppingController < ApplicationController
     @g_member.each do |gm|
       @s_member << [gm.nickname, gm.user_id]
     end
+    @s_member << ['未設定',"''"]
   end
   
+  def set_seach_list
+    #検索条件の配列作成
+    @search_list = [["全件", "0"], ["購入できなかった", "1"], ["購入価格を0円に設定している", "2"], ["予定数より購入できなかった", "3"]]
+  end
 end

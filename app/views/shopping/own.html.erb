@@ -56,34 +56,67 @@
   <table class="table table-hover align-items-center table-sm">
     <thead>
       <tr>
-          <th scope="col" class="d-none d-sm-table-cell"><%= link_to "#", shopping_own_path + "/priority/" + sort %><% if params[:colum] == "priority" %><%= mark %><% end %></th>
-          <th><%= link_to "本の名前", shopping_own_path + "/item_name/" + sort %><% if params[:colum] == "item_name" %><%= mark %><% end %></th>
-          <th><%= link_to "スペース番号", shopping_own_path + "/space_number/" + sort %><% if params[:colum].nil? or params[:colum] == "space_number" %><%= mark %><% end %></th>
-          <th scope="col" class="d-none d-sm-table-cell"><%= link_to "サークル名", shopping_own_path + "/circle_name/" + sort %><% if params[:colum] == "circle_name" %><%= mark %><% end %></th>
+        <%
+          priority_path = "#{shopping_own_path}/priority/#{sort}"
+          item_name_path = "#{shopping_own_path}/item_name/#{sort}"
+          space_path = "#{shopping_own_path}/space_number/#{sort}"
+          circle_name_path = "#{shopping_own_path}/circle_name/#{sort}"
+          if !params[:mode].nil?
+            priority_path = "#{priority_path}?mode=preview&id=#{params[:id]}"
+            item_name_path = "#{item_name_path}?mode=preview&id=#{params[:id]}"
+            space_path = "#{space_path}?mode=preview&id=#{params[:id]}"
+            circle_name_path = "#{circle_name_path}?mode=preview&id=#{params[:id]}"
+          end
+        %>
+          <th scope="col"><%= link_to "#", priority_path %><% if params[:colum] == "priority" %><%= mark %><% end %></th>
+          <th scope="col"><%= link_to "本の名前", item_name_path %><% if params[:colum] == "item_name" %><%= mark %><% end %></th>
+          <th scope="col" class="d-none d-sm-table-cell"><%= link_to "スペース番号", space_path %><% if params[:colum].nil? or params[:colum] == "space_number" %><%= mark %><% end %></th>
+          <th scope="col" class="d-none d-sm-table-cell"><%= link_to "サークル名", circle_name_path %><% if params[:colum] == "circle_name" %><%= mark %><% end %></th>
           <th scope="col" class="d-none d-sm-table-cell">値段</th>
-          <th>購入数</th>
+          <th scope="col" class="d-none d-sm-table-cell">購入数</th>
+          <th scope="col" class="d-table d-md-none"><%= link_to "スペース番号等", space_path %><% if params[:colum].nil? or params[:colum] == "space_number" %><%= mark %><% end %></th>
           <th></th>
       </tr>
     </thead>
     <tbody>
       <% @item.each do |p| %>
         <tr>
-          <td class="d-none d-sm-table-cell"><%= p.priority.to_s %></td>
-          <td><% if p.item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %><%= link_to p.item.item_name, plan_display_path + '/' + p.id.to_s, remote: true %></td>
-          <td><%= p.block_number %>-<%= p.space_number %></td>
+          <td><%= p.priority.to_s %></td>
+          <td>
+            <% if p.item.item_label != "none" %><i class="fas fa-tag <%= p.item.item_label %>"></i><% end %>
+            <% if p.item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+            <%= link_to p.item.item_name, plan_display_path + '/' + p.id.to_s, remote: true %>
+            <% if p.item.item_url.to_s.size > 0 %>
+              <%= link_to p.item.item_url, target: "_blank" do %>
+                <i class="fas fa-home"></i>
+              <% end %>
+            <% end %>
+          </td>
+          <td class="d-none d-sm-table-cell"><%= p.block_number %>-<%= p.space_number %></td>
           <td class="d-none d-sm-table-cell"><%= p.item.circle_name %></td>
           <td class="d-none d-sm-table-cell"><% if p.item.price.nil?%>未設定<% else %><%= p.item.price.to_s %>円<% end %></td>
-          <td>
+          <td class="d-none d-sm-table-cell">
             <% want_count_sum = 0 %>
             <% p.purchase_members.each {|pm| want_count_sum += pm.want_count } %>
             <%= want_count_sum.to_s %>
           </td>
+          <td class="d-table d-md-none">
+            <%= p.block_number %>-<%= p.space_number %><br />
+            <%= p.item.circle_name %><br />
+            <% if p.item.price.nil?%>未設定<% else %><%= p.item.price.to_s %>円<% end %><br />
+            <%= want_count_sum.to_s %>冊
+          </td>
           <td>
             <div class="btn-group-vertical btn-group-xs">
-              <%= form_tag( {controller: :shopping, action: :save_bad}, id: :fs, class: "form-inline")do %>
-                <%= link_to '〇', shopping_status_path + '/' + p.id.to_s + '/' + want_count_sum.to_s, remote: true, class:"btn btn-primary btn-sm" %>
-                <%= hidden_field_tag 'p_id', p.id %>
-                <%= submit_tag "×", data: { confirm: '購入不可としますか？' }, class: "btn btn-danger", id: "btn btn-danger btn-s", name:"bad" %>
+              <% if params[:mode].nil? %>
+                <%= form_tag( {controller: :shopping, action: :save_bad}, id: :fs, class: "form-inline")do %>
+                  <%= link_to '〇', shopping_status_path + '/' + p.id.to_s + '/' + want_count_sum.to_s, remote: true, class:"btn btn-primary btn-sm" %>
+                  <%= hidden_field_tag 'p_id', p.id %>
+                  <%= submit_tag "×", data: { confirm: '購入不可としますか？' }, class: "btn btn-outline-danger btn-sm", id: "btn btn-outline-danger btn-s", name:"bad" %>
+                <% end %>
+              <% else %>
+                <%= link_to '〇', "#", class:"btn btn-primary btn-sm disabled" %>
+                <%= link_to '×', "#", class:"btn btn-outline-danger btn-sm disabled" %>
               <% end %>
             </div>
           </td>

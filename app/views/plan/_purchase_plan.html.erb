@@ -23,10 +23,19 @@
     <%= form.text_field :circle_name, id: :circle_name, class: "form-control", maxlength: 30 %><br/>
     <%= form.label :price %>
     <%= form.number_field :price, id: :price, min: 0, class: "form-control" %><br/>
+    <%= form.label :item_url %><small class="text-warning"> 150文字以内</small>
+    <%= form.text_field :item_url, id: :item_url, class: "form-control", maxlength: 150, placeholder:"https://" %><br/>
     <%= form.label :novelty_flg %>
     <%= form.radio_button :novelty_flg, 2 %>無 <%= form.radio_button :novelty_flg, 1 %>有 <%= form.radio_button :novelty_flg, 0 %>不明<br />
-    <%= form.label :item_memo %><small class="text-warning"> 100文字以内</small>
-    <%= form.text_area :item_memo, id: :itemmemo, class: "form-control", size: "10x5", maxlength: 100 %><br/>
+    <%= form.label :item_label %>
+    <%= form.radio_button :item_label, "none" %>無し 
+    <%= form.radio_button :item_label, "text-dark" %><i class="fas fa-tag text-dark"></i> 
+    <%= form.radio_button :item_label, "text-danger" %><i class="fas fa-tag text-danger"></i> 
+    <%= form.radio_button :item_label, "text-info" %><i class="fas fa-tag text-info"></i> 
+    <%= form.radio_button :item_label, "text-success" %><i class="fas fa-tag text-success"></i> 
+    <%= form.radio_button :item_label, "text-primary" %><i class="fas fa-tag text-primary"></i><br />
+    <%= form.label :item_memo %><small class="text-warning"> 200文字以内</small>
+    <%= form.text_area :item_memo, id: :itemmemo, class: "form-control", size: "10x5", maxlength: 200 %><br/>
     <%= form.label :purchase_user_id %>
     <%= form.select :purchase_user_id, @group_member.map{|t| [t.nickname, t.user_id]}, {include_blank: true}, {class: "form-control"} %><br/>
     <%= form.label :priority %><small class="text-warning"> 数字のみ</small>
@@ -46,6 +55,10 @@
     <%= form.hidden_field :item_id %>
   </div>
   <div>
+    <% if @plan.mode == "new" %>
+      <%= form.check_box :cotinue_flg, {}, true, false %>続けてアイテムを登録する<br/>
+      <%= form.check_box :cotinue_circle_flg, {}, true, false %>サークル情報を引き継ぐ<br/>
+    <% end %>
     <%= button_tag(class: "btn btn-primary btn-icon") do %>
       <% if @plan.mode == "new" %>
         <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>

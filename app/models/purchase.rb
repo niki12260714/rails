@@ -9,4 +9,9 @@ class Purchase < ApplicationRecord
     where(purchase_user_id: uid, item_purchase_status: 0)
   }
   
+  #買出し担当が引数のユーザーかつ購入ステータスが購入済みのスコープ(shopping_controllerで使用)
+  scope :get_own_end_charge, ->(uid){
+    where(purchase_user_id: uid).where.not(item_purchase_status: 0)
+  }
+  
 end

@@ -1,0 +1,79 @@
+<%= render 'layouts/message' %>
+<%= form_tag( {controller: :shopping, action: :search_correction}, id: :fs, class: "form-inline")do %>
+  <div class="btn-group mr-2">
+    <%= select_tag 'search', options_for_select(@search_list, selected: @search), class: "form-control" %>
+    <span class="input-group-btn">
+      <%= button_tag( class: "btn btn-info btn-icon") do %>
+        <span class="btn-inner--icon"><i class="fas fa-search"></i></span>
+        <span class="btn-inner--text">検索</span>
+      <% end %>
+    </span>
+  </div>
+<% end %>
+<br />
+<% if @item.length == 0 then %>
+  本日の購入済みアイテムはありません。
+<% else %>
+  <%= form_tag( {controller: :shopping, action: :change_member}, id: :fcm, class: "form-inline")do %>
+    <table class="table table-hover align-items-center table-sm">
+      <thead>
+        <tr>
+            <th scope="col">本の名前</th>
+            <th scope="col">購入状況</th>
+            <th scope="col" class="d-none d-sm-table-cell">金額</th>
+            <th scope="col" class="d-none d-sm-table-cell">購入実数</th>
+            <th scope="col" class="d-table d-md-none">金額等</th>
+            <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @item.each do |p| %>
+          <tr>
+            <td>
+              <% if p.item.item_label != "none" %><i class="fas fa-tag <%= p.item.item_label %>"></i><% end %>
+              <% if p.item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+              <%= link_to p.item.item_name, plan_display_path + '/' + p.id.to_s, remote: true %>
+              <% if p.item.item_url.to_s.size > 0 %>
+                <%= link_to p.item.item_url, target: "_blank" do %>
+                  <i class="fas fa-home"></i>
+                <% end %>
+              <% end %>
+            </td>
+            <td>
+              <% case p.item_purchase_status %>
+                <% when 0 then %>
+                  未購入
+                <% when 1 then %>
+                  購入済み
+                <% when 2 then %>
+                  購入不可
+                <% else %>
+                  一部購入
+               <% end %> 
+            </td>
+            <td class="d-none d-sm-table-cell">
+              <%= p.item.price %>円
+            </td>
+            <td class="d-none d-sm-table-cell">
+              <%= p.purchase_count %>
+            </td>
+            <td class="d-table d-md-none">
+              <%= p.item.price %>円<br />
+              <%= p.purchase_count %>冊
+            </td>
+            <td>
+              <%
+                want_count_sum = 0
+                p.purchase_members.each {|pm| want_count_sum += pm.want_count }
+              %>
+              <%= link_to '修正', "#{shopping_status_path}/#{p.id.to_s}/#{want_count_sum.to_s}", remote: true, class:"btn btn-primary btn-sm" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+<% end %>
+<div id="shopping-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+<div id="plan-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+<div id="plan-display-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>

@@ -1,6 +1,31 @@
 <%= render 'layouts/message' %>
-<H3>バイレーツは即売会向け共同購入お助けアプリです</H3>
+<H3>カウカウOnlineは即売会向け共同購入お助けアプリです</H3>
 <br>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/PmEdGKwi2iU" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<div>
+  <div class="row">
+    <div class="col-xl-6">
+      <%= image_tag 'step-1.png', class: "img-fluid" %><br />
+      <%= image_tag 'step-2.png', class: "img-fluid" %>
+    </div>
+    <div class="col-xl-6">
+      <%= image_tag 'step-3.png', class: "img-fluid" %><br />
+      <%= image_tag 'step-4.png', class: "img-fluid" %>
+    </div>
+  </div>
+</div>
+
 <br />
-<%= link_to 'ユーザー登録して使用してみる', new_user_registration_path %>
+詳しくは<%= link_to "カウカウOnlineについて", top_links_path, target: "_new" %>をご覧ください。<br/>
+また利用を開始する際は、必ず<%= link_to "利用規約", top_rulu_path, target: "_new" %>をご確認いただき、同意のうえで登録・認証を行ってください。<br />
+<br/>
+<%= link_to new_user_registration_path do %>
+  <i class="fas fa-user"></i>ユーザー登録して使用してみる
+<% end %>
+<br/>
+<a href="/users/auth/twitter">
+  <i class="fab fa-twitter"></i>twitter認証を利用して使用してみる
+</a>
+<br/><br/>
+<a href="https://twitter.com/kaukau_online?lang=ja" target="_new">
+  <i class="fab fa-twitter"></i>カウカウOnline情報発信アカウント
+</a>

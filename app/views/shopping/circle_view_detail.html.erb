@@ -1,0 +1,73 @@
+<%= render 'layouts/message' %>
+<h4><%= "【#{session[:circle_info][:join_circle_number]}：#{session[:circle_info][:circle_name_first]}】" %></h4>
+  <br />
+<% if @item.size == 0 %>
+  このサークルでの買い物はありません
+<% else %>
+  <table class="table table-hover align-items-center table-sm">
+    <thead>
+      <tr>
+          <th scope="col">#</th>
+          <th scope="col">本の名前</th>
+          <th scope="col" class="d-none d-sm-table-cell">値段</th>
+          <th scope="col" class="d-none d-sm-table-cell">購入数</th>
+          <th scope="col" class="d-table d-md-none">値段等</th>
+          <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @item.each do |p| %>
+        <tr>
+          <td><%= p.priority.to_s %></td>
+          <td>
+            <% if p.item.item_label != "none" %><i class="fas fa-tag <%= p.item.item_label %>"></i><% end %>
+            <% if p.item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+            <%= link_to p.item.item_name, plan_display_path + '/' + p.id.to_s, remote: true %>
+            <% if p.item.item_url.to_s.size > 0 %>
+              <%= link_to p.item.item_url, target: "_blank" do %>
+                <i class="fas fa-home"></i>
+              <% end %>
+            <% end %>
+          </td>
+          <td class="d-none d-sm-table-cell"><% if p.item.price.nil?%>未設定<% else %><%= p.item.price.to_s %>円<% end %></td>
+          <td class="d-none d-sm-table-cell">
+            <% want_count_sum = 0 %>
+            <% p.purchase_members.each {|pm| want_count_sum += pm.want_count } %>
+            <%= want_count_sum.to_s %>
+          </td>
+          <td class="d-table d-md-none">
+            <% if p.item.price.nil?%>未設定<% else %><%= p.item.price.to_s %>円<% end %><br />
+            <%= want_count_sum.to_s %>冊
+          </td>
+          <td>
+            <div class="btn-group-vertical btn-group-xs">
+              <% if params[:mode].nil? %>
+                <%= form_tag( {controller: :shopping, action: :save_bad}, id: :fs, class: "form-inline")do %>
+                  <%= link_to '〇', shopping_status_path + '/' + p.id.to_s + '/' + want_count_sum.to_s, remote: true, class:"btn btn-primary btn-sm" %>
+                  <%= hidden_field_tag 'p_id', p.id %>
+                  <%= hidden_field_tag 'rtn', 'circle_view' %>
+                  <%= submit_tag "×", data: { confirm: '購入不可としますか？' }, class: "btn btn-outline-danger btn-sm", id: "bad", name:"bad" %>
+                <% end %>
+              <% else %>
+                <%= link_to '〇', "#", class:"btn btn-primary btn-sm disabled" %>
+                <%= link_to '×', "#", class:"btn btn-outline-danger btn-sm disabled" %>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+<%= form_tag( {controller: :shopping, action: :circle_view}, id: :block_form)do %>
+  <%= hidden_field_tag 'block_no', session[:circle_info][:display_block_no] %>
+  <% unless params[:mode].nil? %>
+    <%= hidden_field_tag 'mode', params[:mode].to_s %>
+    <%= hidden_field_tag 'id', params[:id].to_s %>
+  <% end %>
+  <%= submit_tag "戻る", class: "btn btn-link", id: "back", name:"back" %>
+<% end %>
+
+<div id="shopping-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+<div id="plan-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+<div id="plan-display-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>

@@ -74,7 +74,7 @@
           <thead>
             <tr>
                 <% if @search== "0" %><th scope="col"><input type="checkbox" id="all_items" onchange="item_change()"></th><% end %>
-                <th scope="col" class="d-none d-sm-table-cell"><%= link_to "#", shopping_group_path + "/" + @item.first.group_id.to_s + "/" + @search + "/" + @member + "/priority/" + sort %><% if @col == "priority" %><%= mark %><% end %></th>
+                <th scope="col"><%= link_to "#", shopping_group_path + "/" + @item.first.group_id.to_s + "/" + @search + "/" + @member + "/priority/" + sort %><% if @col == "priority" %><%= mark %><% end %></th>
                 <th scope="col"><%= link_to "本の名前", shopping_group_path + "/" + @item.first.group_id.to_s + "/" + @search + "/" + @member + "/item_name/" + sort %><% if @col == "item_name" %><%= mark %><% end %></th>
                 <th scope="col"><%= link_to "スペース番号", shopping_group_path + "/" + @item.first.group_id.to_s + "/" + @search + "/" + @member + "/space_number/" + sort %><% if @col == "space_number" %><%= mark %><% end %></th>
                 <th scope="col" class="d-none d-sm-table-cell"><%= link_to "サークル名", shopping_group_path + "/" + @item.first.group_id.to_s + "/" + @search + "/" + @member + "/circle_name/" + sort %><% if @col == "circle_name" %><%= mark %><% end %></th>
@@ -86,13 +86,19 @@
             <% @item.each do |p| %>
               <tr>
                 <% if @search == "0" %><td><%= check_box_tag 'purchase[]', p.id, false, {class: "items"} %></td><% end %>
-                <td class="d-none d-sm-table-cell"><%= p.priority.to_s %></td>
+                <td><%= p.priority.to_s %></td>
                 <td>
+                  <% if p.item.item_label != "none" %><i class="fas fa-tag <%= p.item.item_label %>"></i><% end %>
                   <% if p.item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
                   <% if p.item_purchase_status == 0 %>
                     <%= link_to p.item.item_name, plan_edit_path + '/' + p.group_id.to_s + '/'  + p.item.id.to_s %>
                   <% else %>
                     <%= link_to p.item.item_name, plan_display_path + '/' + p.id.to_s, remote: true %>
+                  <% end %>
+                  <% if p.item.item_url.to_s.size > 0 %>
+                    <%= link_to p.item.item_url, target: "_blank" do %>
+                      <i class="fas fa-home"></i>
+                    <% end %>
                   <% end %>
                 </td>
                 <td><%= p.block_number %>-<%= p.space_number %></td>
@@ -114,7 +120,7 @@
             <% end %>
           </tbody>
         </table>
-        <% if @pager_set != "all" %><%= will_paginate(@item, renderer: WillPaginate::ActionView::Bootstrap4LinkRenderer, previous_label: '&lt 前へ', next_label: '次へ &gt') %><% end %>
+        
         <% if @search.to_s == "0" %>
           <br />
           <%= select_tag 'change_member', options_for_select(@s_member, selected: @member), class: "form-control" %>

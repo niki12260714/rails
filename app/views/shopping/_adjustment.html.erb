@@ -37,7 +37,16 @@
     <tbody>
       <% @purchase.each do |p| %>
         <tr>
-          <td><% if p.item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %><%= link_to p.item.item_name, plan_display_path + '/' + p.id.to_s, remote: true %></td>
+          <td>
+            <% if p.item.item_label != "none" %><i class="fas fa-tag <%= p.item.item_label %>"></i><% end %>
+            <% if p.item.novelty_flg.to_i == 1 %><i class="fas fa-gift text-danger"></i><% end %>
+            <%= link_to p.item.item_name, plan_display_path + '/' + p.id.to_s, remote: true %>
+            <% if p.item.item_url.to_s.size > 0 %>
+              <%= link_to p.item.item_url, target: "_blank" do %>
+                <i class="fas fa-home"></i>
+              <% end %>
+            <% end %>
+          </td>
           <td><%= p.block_number %>-<%= p.space_number %></td>
           <td class="d-none d-sm-table-cell"><%= p.item.circle_name %></td>
           <td class="d-none d-sm-table-cell"><% if p.item.price.nil?%>未設定<% else %><%= p.item.price.to_s %>円<% end %></td>
